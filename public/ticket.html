@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eventra | Official Ticket</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600;700&amp;family=Manrope:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#d0bcff",
+                        "secondary": "#4cd7f6",
+                        "background": "#051424",
+                        "on-background": "#d4e4fa",
+                        "surface-variant": "#273647",
+                        "on-surface-variant": "#cbc3d7"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Noto Serif"],
+                        "headline-lg": ["Noto Serif"],
+                        "label-caps": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "display-xl": ["Noto Serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .refined-border {
+            border: 1px solid transparent;
+            background-image: linear-gradient(#051424, #051424), linear-gradient(135deg, rgba(208, 188, 255, 0.4) 0%, transparent 100%);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        .mesh-gradient-bg {
+            background: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+        }
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+        }
+        /* Dashboard specific fallback */
+        .glass-ui {
+            background: rgba(5, 5, 5, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Print Styles */
+        @media print {
+            body { background: white !important; color: black !important; }
+            .mesh-gradient-bg { display: none !important; }
+            header, .actions-bar, .logistics-side { display: none !important; }
+            .ticket-print-area { box-shadow: none !important; border: 2px solid #000 !important; border-radius: 0 !important; width:100% !important; max-width: none !important; background: white !important; padding: 20px;}
+            * { color: black !important; }
+            main { padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="font-body-md overflow-x-hidden mesh-gradient-bg min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 glass-ui border-b border-white/5 shadow-sm">
+<nav class="flex justify-between items-center h-20 px-8 w-full">
+<div class="flex items-center cursor-pointer" onclick="window.location.href='user_dashboard.html'">
+    <img src="logo.jpeg" alt="Eventra Logo" class="h-16 w-auto object-contain mix-blend-screen filter drop-shadow-lg">
+</div>
+<div class="hidden md:flex items-center space-x-12">
+<a class="text-violet-400 font-bold font-label-caps hover:text-white transition-colors duration-300" href="#">Ticket</a>
+</div>
+</nav>
+</header>
+
+<div id="errorMsg" style="text-align:center; padding-top:20vh; display:none;">
+<h2 class="text-2xl font-bold text-red-500 mb-4">Ticket Not Found or Access Denied</h2>
+<a href="index.html" class="text-violet-400 underline font-bold hover:text-white">Go to Login</a>
+</div>
+
+<main id="ticketWrapper" class="pt-32 pb-24 px-8 max-w-[1440px] mx-auto hidden">
+<!-- Confirmation Hero -->
+<section class="text-center mb-16 logistics-side">
+<div class="inline-flex items-center px-4 py-1 rounded-full border border-green-500/30 bg-green-900/20 text-green-400 mb-6 font-bold shadow-[0_0_20px_rgba(7ade80,0.1)]">
+<span class="material-symbols-outlined text-[18px] mr-2" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-caps uppercase">Booking Confirmed</span>
+</div>
+<h1 class="font-display-xl text-5xl md:text-6xl text-white mb-4">You're on the list.</h1>
+<p class="font-body-lg text-lg text-stone-400 max-w-2xl mx-auto">Your exclusive entry to the event has been secured.</p>
+</section>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-12 gap-8 lg:gap-12">
+<!-- Left Side: Ticket -->
+<div class="col-span-12 lg:col-span-7 flex flex-col items-center">
+<div class="relative group w-full max-w-lg mx-auto" id="ticketContent">
+<!-- The Ticket -->
+<div class="ticket-print-area relative bg-stone-900/80 backdrop-blur-xl rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl">
+<div class="p-8 pb-12 border-b border-dashed border-white/20 relative">
+<!-- Notch Elements -->
+<div class="absolute -bottom-4 -left-4 w-8 h-8 bg-[#051424] rounded-full border border-white/10 shadow-inner"></div>
+<div class="absolute -bottom-4 -right-4 w-8 h-8 bg-[#051424] rounded-full border border-white/10 shadow-inner"></div>
+
+<div class="flex justify-between items-start mb-8">
+<div>
+<span class="font-label-caps text-violet-400 uppercase tracking-[0.2em] block mb-2 font-bold">VIP Access Pass</span>
+<h2 class="font-headline-lg text-3xl font-bold text-white" id="tUserName">Holder Name</h2>
+</div>
+<div class="w-16 h-16 bg-violet-900/40 rounded-2xl flex items-center justify-center border border-violet-500/30 shadow-[0_0_15px_rgba(139,92,246,0.3)] text-violet-300">
+<i class="fa-solid fa-crown text-2xl"></i>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<p class="font-label-caps text-stone-500 mb-1 font-bold">EVENT</p>
+<h3 class="font-headline-md text-2xl font-bold text-stone-200" id="tEventTitle">Event Title</h3>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div>
+<p class="font-label-caps text-stone-500 mb-1 font-bold">DATE & TIME</p>
+<p class="font-body-lg text-violet-300 font-bold" id="tDatetime">Wed, Sep 24 @ 6:00 PM</p>
+</div>
+<div>
+<p class="font-label-caps text-stone-500 mb-1 font-bold">ORDER TOTAL</p>
+<p class="font-body-lg text-cyan-400 font-bold" id="tPriceInfo">$49.00 (PAID)</p>
+</div>
+</div>
+<div>
+<p class="font-label-caps text-stone-500 mb-1 font-bold">VENUE / LOCATION</p>
+<p class="font-body-lg text-stone-300 font-bold" id="tLocation">Grand Hall, City Center</p>
+</div>
+</div>
+</div>
+<!-- Ticket Footer / QR Section -->
+<div class="p-8 flex flex-col items-center bg-black/40">
+<div class="p-3 bg-white rounded-2xl mb-4 border border-white/10">
+<img id="tQrImage" alt="Ticket QR Code" class="w-32 h-32"/>
+</div>
+<p class="font-label-caps text-stone-400 tracking-widest mb-2 font-bold uppercase text-[10px]">Scan for Entry</p>
+</div>
+</div>
+</div>
+
+<div class="mt-8 flex flex-wrap justify-center gap-4 actions-bar">
+<button class="px-6 py-3 bg-violet-600 text-white font-bold rounded-lg shadow-md hover:bg-violet-500 hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] transition-all flex items-center" onclick="downloadTicket()">
+    <i class="fa-solid fa-download mr-2"></i> Save as PDF
+</button>
+<button class="px-6 py-3 bg-stone-800 text-stone-200 font-bold rounded-lg border border-white/10 hover:bg-stone-700 transition-all flex items-center" onclick="window.print()">
+    <i class="fa-solid fa-print mr-2"></i> Print Ticket
+</button>
+<button class="px-6 py-3 bg-cyan-900/30 text-cyan-400 font-bold rounded-lg border border-cyan-500/30 hover:bg-cyan-900/50 transition-all flex items-center" onclick="window.location.href='user_dashboard.html'">
+    Return to Hub
+</button>
+</div>
+</div>
+
+<!-- Right Side: Logistics & Addons -->
+<div class="col-span-12 lg:col-span-5 space-y-8 logistics-side">
+<!-- Add to Calendar Section -->
+<div class="refined-border p-8 rounded-[2rem] bg-stone-900/40 backdrop-blur-md">
+<h3 class="font-headline-md text-2xl font-bold text-white mb-6">Plan Your Schedule</h3>
+<div class="grid grid-cols-1 gap-4">
+<div id="gcalLink" class="group flex items-center p-4 rounded-xl bg-white/5 border border-white/10 hover:border-violet-500 transition-all cursor-pointer">
+<div class="w-12 h-12 rounded-xl bg-violet-900/40 flex items-center justify-center text-violet-400 mr-4 border border-violet-500/20">
+<i class="fa-solid fa-calendar-plus text-xl"></i>
+</div>
+<div class="flex-1">
+<p class="font-body-md text-stone-200 font-bold">Google Calendar</p>
+<p class="text-sm text-stone-500">Sync details automatically</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Map Preview Section -->
+<div class="refined-border rounded-[2rem] overflow-hidden bg-stone-900/40 backdrop-blur-md">
+<div class="h-48 relative bg-stone-800 group flex items-center justify-center cursor-pointer" id="mapLink">
+<iframe id="mapIframe" width="100%" height="100%" frameborder="0" style="border:0; pointer-events:none;" allowfullscreen></iframe>
+<div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+    <span class="text-white font-bold"><i class="fa-solid fa-map-location-dot mr-2"></i>Open in Maps</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-caps text-stone-500 mb-1 font-bold">LOCATION</p>
+<p class="text-stone-300 font-body-md font-bold" id="sideLocation">Check Ticket for Venue</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Advisory Section -->
+<div class="p-6 rounded-[2rem] bg-cyan-900/20 border border-cyan-500/30">
+<div class="flex space-x-4">
+<i class="fa-solid fa-circle-info text-cyan-400 text-xl mt-1"></i>
+<div>
+<p class="font-label-caps text-cyan-300 mb-2 font-bold uppercase">Visionary Entry Rules</p>
+<ul class="text-sm text-stone-400 space-y-2 font-body-md">
+<li>• Please present your VIP digital QR code at the entrance.</li>
+<li>• Arrive at least 15 minutes prior to the event time.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    function downloadTicket() {
+      window.scrollTo(0, 0); // Reset scroll to prevent top/bottom cutoff
+      const element = document.getElementById('ticketContent');
+      
+      // Ensure the QR code image is fully loaded before capturing
+      const qrImg = document.getElementById('tQrImage');
+      if (qrImg && !qrImg.complete) {
+          qrImg.onload = () => executeDownload(element);
+      } else {
+          executeDownload(element);
+      }
+    }
+
+    function executeDownload(element) {
+      // Lock dimensions to prevent responsive squishing (which causes page break cutoffs)
+      const originalWidth = element.style.width;
+      const originalMaxWidth = element.style.maxWidth;
+      element.style.width = '500px';
+      element.style.maxWidth = 'none';
+
+      // Show processing state on button
+      const btn = document.querySelector('button[onclick="downloadTicket()"]');
+      const originalBtnHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Generating...';
+      btn.disabled = true;
+
+      // Add a tiny delay to allow the browser to apply the 500px width
+      setTimeout(() => {
+          window.html2canvas(element, {
+              scale: 2,
+              useCORS: true,
+              backgroundColor: '#0f172a',
+              scrollY: -window.scrollY // absolute guarantee against scroll cutoff
+          }).then(canvas => {
+              const imgData = canvas.toDataURL('image/jpeg', 1.0);
+              const { jsPDF } = window.jspdf;
+              
+              // Create PDF in A4 portrait
+              const pdf = new jsPDF('p', 'mm', 'a4');
+              const pdfWidth = pdf.internal.pageSize.getWidth();
+              const pdfHeight = pdf.internal.pageSize.getHeight();
+              
+              // Calculate image dimensions
+              const imgProps = pdf.getImageProperties(imgData);
+              const imgRatio = imgProps.width / imgProps.height;
+              
+              // We want 10mm margins on sides
+              const margin = 10;
+              const maxPdfWidth = pdfWidth - (margin * 2);
+              const maxPdfHeight = pdfHeight - (margin * 2);
+              
+              let finalWidth = maxPdfWidth;
+              let finalHeight = finalWidth / imgRatio;
+              
+              // If it's too tall, scale by height instead
+              if (finalHeight > maxPdfHeight) {
+                  finalHeight = maxPdfHeight;
+                  finalWidth = finalHeight * imgRatio;
+              }
+              
+              // Center it horizontally
+              const xPos = (pdfWidth - finalWidth) / 2;
+              const yPos = margin; // Align to top with margin
+              
+              pdf.addImage(imgData, 'JPEG', xPos, yPos, finalWidth, finalHeight);
+              pdf.save('Eventra_Pass.pdf');
+
+              // Restore responsive styles and button
+              element.style.width = originalWidth;
+              element.style.maxWidth = originalMaxWidth;
+              btn.innerHTML = originalBtnHtml;
+              btn.disabled = false;
+          }).catch(err => {
+              console.error('PDF Generation Error:', err);
+              element.style.width = originalWidth;
+              element.style.maxWidth = originalMaxWidth;
+              btn.innerHTML = originalBtnHtml;
+              btn.disabled = false;
+              alert('Failed to generate PDF. Please try again.');
+          });
+      }, 100);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventId = urlParams.get('eventId');
+      
+      const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+      const events = JSON.parse(localStorage.getItem('events')) || [];
+      
+      let evt = events.find(e => e.id === eventId);
+      let tName = loggedInUser ? loggedInUser.name : urlParams.get('name');
+      
+      if (!evt) {
+        if (urlParams.get('title')) {
+           evt = {
+             title: urlParams.get('title'),
+             date: urlParams.get('date'),
+             time: urlParams.get('time'),
+             location: urlParams.get('location'),
+             price: urlParams.get('price')
+           };
+        }
+      }
+
+      if (!evt || !tName) {
+        document.getElementById('errorMsg').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('ticketWrapper').classList.remove('hidden');
+
+      document.getElementById('tEventTitle').innerText = evt.title;
+      document.getElementById('tUserName').innerText = tName;
+      document.getElementById('tDatetime').innerText = `${evt.date} @ ${evt.time || ''}`;
+      document.getElementById('tLocation').innerText = evt.location || 'TBA';
+      document.getElementById('sideLocation').innerText = evt.location || 'TBA';
+      document.getElementById('tPriceInfo').innerText = `₹${evt.price || 'Free'}`;
+
+      // Google Calendar Logic
+      const gcalDate = evt.date ? evt.date.replace(/-/g, '') : '';
+      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(evt.title)}&dates=${gcalDate}/${gcalDate}&details=${encodeURIComponent('Ticket for ' + evt.title)}&location=${encodeURIComponent(evt.location || '')}`;
+      document.getElementById('gcalLink').onclick = () => window.open(gcalUrl, '_blank');
+
+      // Google Maps Logic
+      if (evt.location) {
+          const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(evt.location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+          const mapIframe = document.getElementById('mapIframe');
+          if (mapIframe) mapIframe.src = mapUrl;
+          
+          const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(evt.location)}`;
+          const mapLink = document.getElementById('mapLink');
+          if (mapLink) mapLink.onclick = () => window.open(directionsUrl, '_blank');
+      }
+
+      let currentPath = window.location.href.split('?')[0];
+      if (currentPath.startsWith('file://')) {
+        currentPath = 'http://localhost:3000/ticket.html'; 
+      }
+      
+      const ticketUrlObj = new URL(currentPath);
+      ticketUrlObj.searchParams.set('eventId', eventId || '');
+      ticketUrlObj.searchParams.set('name', tName || '');
+      ticketUrlObj.searchParams.set('title', evt.title || '');
+      ticketUrlObj.searchParams.set('date', evt.date || '');
+      ticketUrlObj.searchParams.set('time', evt.time || '');
+      ticketUrlObj.searchParams.set('location', evt.location || '');
+      ticketUrlObj.searchParams.set('price', evt.price || '');
+      
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(ticketUrlObj.href)}`;
+      document.getElementById('tQrImage').src = qrUrl;
+    });
+</script>
+</body>
+</html>

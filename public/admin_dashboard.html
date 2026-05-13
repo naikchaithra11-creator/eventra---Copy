@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eventra | Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600;700&amp;family=Manrope:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
+
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .refined-border {
+            border: 1px solid transparent;
+            background: linear-gradient(135deg, rgba(208, 188, 255, 0.1), transparent) border-box;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .mesh-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+            background-color: #010f1f;
+        }
+        body {
+            background-color: #010f1f;
+            color: #d4e4fa;
+        }
+        .glass-card {
+            background: rgba(13, 28, 45, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Dashboard chat user active style */
+        .chat-user-btn {
+          background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #cbc3d7; padding: 10px; cursor: pointer; border-radius: 8px; width: 100%; text-align: left; transition: all 0.2s; margin-bottom: 5px;
+        }
+        .chat-user-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .chat-user-btn.active {
+          background: #d0bcff; color: #3c0091; border-color: #d0bcff; font-weight: bold;
+        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-overlay:not(.hidden) { display: flex !important; }
+        .hidden { display: none !important; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "surface-variant": "#273647",
+                "on-background": "#d4e4fa",
+                "primary-container": "#a078ff",
+                "on-secondary-container": "#00424e",
+                "secondary-container": "#03b5d3",
+                "surface-dim": "#051424",
+                "primary-fixed-dim": "#d0bcff",
+                "on-tertiary": "#313030",
+                "surface-tint": "#d0bcff",
+                "inverse-surface": "#d4e4fa",
+                "on-tertiary-fixed": "#1c1b1b",
+                "surface-container-lowest": "#010f1f",
+                "on-secondary": "#003640",
+                "on-secondary-fixed-variant": "#004e5c",
+                "on-primary-fixed": "#23005c",
+                "on-error": "#690005",
+                "inverse-on-surface": "#233143",
+                "secondary-fixed-dim": "#4cd7f6",
+                "surface": "#051424",
+                "on-tertiary-fixed-variant": "#474646",
+                "tertiary-fixed-dim": "#c9c6c5",
+                "secondary": "#4cd7f6",
+                "tertiary-container": "#929090",
+                "inverse-primary": "#6d3bd7",
+                "on-primary-container": "#340080",
+                "tertiary-fixed": "#e5e2e1",
+                "surface-bright": "#2c3a4c",
+                "on-error-container": "#ffdad6",
+                "surface-container-low": "#0d1c2d",
+                "on-surface-variant": "#cbc3d7",
+                "tertiary": "#c9c6c5",
+                "on-primary-fixed-variant": "#5516be",
+                "surface-container-highest": "#273647",
+                "on-surface": "#d4e4fa",
+                "secondary-fixed": "#acedff",
+                "outline-variant": "#494454",
+                "error-container": "#93000a",
+                "primary": "#d0bcff",
+                "background": "#051424",
+                "on-primary": "#3c0091",
+                "primary-fixed": "#e9ddff",
+                "surface-container-high": "#1c2b3c",
+                "surface-container": "#122131",
+                "on-tertiary-container": "#2a2a29",
+                "outline": "#958ea0",
+                "on-secondary-fixed": "#001f26",
+                "error": "#ffb4ab"
+              },
+              "fontFamily": {
+                      "headline-md": ["Noto Serif"],
+                      "headline-lg": ["Noto Serif"],
+                      "label-caps": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "display-xl": ["Noto Serif"]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="font-body-md overflow-x-hidden">
+<div class="mesh-canvas bg-background"></div>
+
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 glass-card transition-all border-b border-white/5 shadow-sm">
+<div class="flex justify-between items-center h-20 px-8 w-full">
+<div class="flex items-center">
+    <img src="logo.jpeg" alt="Eventra Logo" class="h-16 w-auto object-contain mix-blend-screen filter drop-shadow-lg">
+</div>
+<div class="hidden md:flex items-center space-x-12">
+<nav class="flex space-x-8">
+<a class="text-violet-400 font-bold font-serif tracking-tight hover:text-violet-300 transition-colors duration-300" href="#">Dashboard</a>
+<a class="text-stone-400 font-serif tracking-tight hover:text-violet-400 transition-colors duration-300" href="#">Approvals</a>
+<a class="text-stone-400 font-serif tracking-tight hover:text-violet-400 transition-colors duration-300" href="#">Users</a>
+</nav>
+<div class="flex items-center space-x-4 text-violet-400">
+<span class="material-symbols-outlined cursor-pointer hover:text-violet-300 transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-violet-300 transition-colors">account_circle</span>
+</div>
+</div>
+</div>
+</header>
+
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-72 border-r border-white/5 glass-card shadow-lg z-40 hidden lg:block">
+<div class="flex flex-col pt-24 pb-8 px-6 space-y-4 font-serif text-sm antialiased h-full">
+<div class="mb-8 px-2 text-center">
+<div class="h-16 w-16 mx-auto bg-violet-900/50 text-violet-300 rounded-full flex items-center justify-center font-bold text-2xl mb-2 border border-violet-500/30">A</div>
+<div class="text-lg font-black text-violet-400" id="userNameDisplay">Admin</div>
+<div class="text-stone-500 text-xs mt-1 font-label-caps">System Administrator</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center px-4 py-3 bg-white/5 border-l-4 border-violet-500 text-white rounded-r-lg font-bold transition-all duration-300" href="#">
+<span class="material-symbols-outlined mr-3 text-violet-400">dashboard_customize</span> Dashboard
+</a>
+<a class="flex items-center px-4 py-3 text-stone-400 hover:text-white transition-all duration-300 hover:bg-white/5 rounded-lg cursor-pointer" onclick="openScannerModal()">
+<span class="material-symbols-outlined mr-3 text-cyan-400">qr_code_scanner</span> Verify Tickets
+</a>
+<a class="flex items-center px-4 py-3 text-stone-400 hover:text-white transition-all duration-300 hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">list_alt</span> Approvals
+</a>
+<a class="flex items-center px-4 py-3 text-stone-400 hover:text-white transition-all duration-300 hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">group</span> Users & Bookings
+</a>
+<a class="flex items-center px-4 py-3 text-stone-400 hover:text-white transition-all duration-300 hover:bg-white/5 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">forum</span> Messages
+</a>
+</nav>
+<div class="pt-6 border-t border-white/5 space-y-1">
+<button id="logoutBtn" class="flex items-center px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-all w-full text-left font-bold">
+<span class="material-symbols-outlined mr-3">logout</span> Sign Out
+</button>
+</div>
+</div>
+</aside>
+
+<!-- Main Content -->
+<main class="lg:ml-72 pt-32 px-8 pb-24">
+<div class="max-w-[1440px] mx-auto">
+<!-- Header Section -->
+<header class="mb-12">
+<h1 class="font-headline-lg text-4xl font-bold text-white mb-2">Management Console</h1>
+<p class="text-stone-400 font-body-lg">Review and orchestrate exclusive visionary event proposals.</p>
+</header>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+<div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:shadow-[0_0_20px_rgba(139,92,246,0.15)] transition-all text-center">
+<p class="font-label-caps text-stone-400 font-bold uppercase mb-2">Total Users</p>
+<h3 class="font-headline-md text-5xl text-violet-400 font-bold" id="adminTotalUsers">0</h3>
+<div class="mt-4 flex items-center justify-center text-xs text-violet-300">
+<span class="material-symbols-outlined text-sm mr-1">groups</span><span>Verified Network</span>
+</div>
+</div>
+<div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all text-center">
+<p class="font-label-caps text-stone-400 font-bold uppercase mb-2">Total Bookings</p>
+<h3 class="font-headline-md text-5xl text-cyan-400 font-bold" id="adminTotalBookings">0</h3>
+<div class="mt-4 flex items-center justify-center text-xs text-cyan-300">
+<span class="material-symbols-outlined text-sm mr-1">ticket</span><span>Confirmed Seats</span>
+</div>
+</div>
+<div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:shadow-[0_0_20px_rgba(208,188,255,0.15)] transition-all text-center">
+<p class="font-label-caps text-stone-400 font-bold uppercase mb-2">Platform Revenue</p>
+<h3 class="font-headline-md text-5xl text-white font-bold" id="adminTotalRevenue">₹0</h3>
+<div class="mt-4 flex items-center justify-center text-xs text-stone-300">
+<span class="material-symbols-outlined text-sm mr-1">payments</span><span>Total Volume</span>
+</div>
+</div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+  <div class="glass-card p-6 rounded-2xl">
+    <h3 class="font-headline-md text-2xl font-bold text-violet-400 mb-6 flex items-center">
+      <span class="material-symbols-outlined mr-2">bar_chart</span> Event Attendees
+    </h3>
+    <canvas id="adminAttendeesChart" style="max-height: 250px;"></canvas>
+  </div>
+  <div class="glass-card p-6 rounded-2xl">
+    <h3 class="font-headline-md text-2xl font-bold text-cyan-400 mb-6 flex items-center">
+      <span class="material-symbols-outlined mr-2">pie_chart</span> Revenue Distribution
+    </h3>
+    <canvas id="adminRevenueChart" style="max-height: 250px;"></canvas>
+  </div>
+</div>
+
+<!-- Proposals / Events Containers -->
+<div class="space-y-12 mb-12">
+    <div>
+        <h2 class="font-headline-md text-3xl font-bold text-white mb-6 flex items-center">
+            <span class="material-symbols-outlined text-cyan-400 mr-3">hourglass_empty</span> Phase 1: Initial Ideas
+        </h2>
+        <div id="pendingProposalsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <p class="text-stone-500 italic">No initial requests.</p>
+        </div>
+    </div>
+    
+    <div>
+        <h2 class="font-headline-md text-3xl font-bold text-white mb-6 flex items-center">
+            <span class="material-symbols-outlined text-violet-400 mr-3">rule</span> Phase 2: Final Review
+        </h2>
+        <div id="finalReviewContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <p class="text-stone-500 italic">No final submissions.</p>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="font-headline-md text-3xl font-bold text-white mb-6 flex items-center">
+            <span class="material-symbols-outlined text-green-400 mr-3">celebration</span> Live Published Events
+        </h2>
+        <div id="approvedEventsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <p class="text-stone-500 italic">No published events.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Users, Bookings & Feedback Lists -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <div class="glass-card p-6 rounded-2xl">
+        <h2 class="font-headline-md text-2xl font-bold text-violet-400 mb-4"><i class="fa-solid fa-users mr-2"></i> Registered Users</h2>
+        <div id="adminUsersList" class="bg-black/20 p-4 rounded-xl max-h-[300px] overflow-y-auto border border-white/5">
+            <p class="text-stone-500 italic">No users found.</p>
+        </div>
+    </div>
+    <div class="glass-card p-6 rounded-2xl">
+        <h2 class="font-headline-md text-2xl font-bold text-cyan-400 mb-4"><i class="fa-solid fa-address-book mr-2"></i> Bookings</h2>
+        <div id="adminBookingsList" class="bg-black/20 p-4 rounded-xl max-h-[300px] overflow-y-auto border border-white/5">
+            <p class="text-stone-500 italic">No bookings found.</p>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-6 rounded-2xl mb-12">
+    <h2 class="font-headline-md text-2xl font-bold text-white mb-4"><i class="fa-solid fa-bullhorn mr-2 text-violet-400"></i> Global Feedback</h2>
+    <div id="adminFeedbackList" class="bg-black/20 p-4 rounded-xl max-h-[300px] overflow-y-auto border border-white/5">
+        <p class="text-stone-500 italic">No feedback has been submitted yet.</p>
+    </div>
+</div>
+
+<!-- Admin Chat Hub -->
+<div class="glass-card p-0 rounded-2xl mb-12 overflow-hidden border border-white/10 shadow-2xl">
+    <div class="bg-gradient-to-r from-violet-600/50 to-cyan-600/50 p-4 border-b border-white/10">
+        <h2 class="text-white font-bold text-xl flex items-center"><span class="material-symbols-outlined mr-2">forum</span> Admin Messages Hub</h2>
+    </div>
+    <div class="flex h-[500px]">
+        <!-- Left Side: Contacts -->
+        <div class="w-1/3 border-r border-white/10 bg-black/40 flex flex-col">
+            <div class="p-3 font-bold text-violet-300 border-b border-white/10 uppercase text-xs tracking-wider">Conversations</div>
+            <div id="chatUserList" class="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
+                <!-- Contacts load here -->
+                <p class="text-sm text-stone-500">Loading...</p>
+            </div>
+        </div>
+        <!-- Right Side: Chat -->
+        <div class="flex-1 flex flex-col bg-transparent">
+            <div id="chatActiveUserHeader" class="p-4 border-b border-white/10 font-bold text-white bg-white/5">Select a user to chat</div>
+            <div class="chat-messages" id="chatMessages" class="flex-1 overflow-y-auto p-4 bg-transparent flex flex-col gap-3 min-h-[350px]">
+                <p class="text-center text-stone-500 text-sm mt-10">Select a user to begin chatting</p>
+            </div>
+            <div class="chat-input-area border-t border-white/10 bg-black/40 p-4 flex gap-3">
+                <input type="text" id="chatInput" placeholder="Type a reply..." class="flex-1 bg-white/5 border border-white/10 text-white rounded-full px-4 py-2 focus:outine-none focus:border-violet-500">
+                <button id="chatSend" class="bg-violet-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-violet-500 transition-all">➤</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</main>
+
+<!-- Scanner Modal -->
+<div id="scannerModal" class="modal-overlay hidden">
+    <div class="modal-content glass-card rounded-2xl p-8 max-w-md w-full relative shadow-2xl text-center" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.1);">
+      <button class="modal-close material-symbols-outlined absolute top-4 right-4 text-stone-400 hover:text-white" onclick="closeScannerModal()" style="position:absolute; top:1rem; right:1rem;">close</button>
+      <h2 class="text-2xl font-bold text-cyan-400 mb-2 flex items-center justify-center"><span class="material-symbols-outlined mr-2">qr_code_scanner</span> Verify Ticket</h2>
+      <p class="text-stone-400 text-sm mb-6">Point your camera at the attendee's QR code.</p>
+      
+      <div id="reader" class="mx-auto overflow-hidden rounded-xl border border-white/20 bg-black" style="width: 100%; max-width: 350px; min-height: 250px;"></div>
+      
+      <div id="scanResult" class="mt-6 p-4 rounded-xl hidden transition-all">
+        <h3 id="scanStatus" class="font-bold text-2xl mb-1 uppercase tracking-widest"></h3>
+        <p id="scanDetails" class="text-sm font-body-md text-stone-200 mt-2"></p>
+        <button onclick="resumeScanner()" id="resumeScanBtn" class="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded border border-white/20 text-white text-xs font-bold uppercase hidden">Scan Another</button>
+      </div>
+    </div>
+</div>
+
+<script src="js/common.js"></script>
+<script src="js/admin.js?v=3"></script>
+</body>
+</html>

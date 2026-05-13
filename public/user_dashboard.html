@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html class="dark scroll-smooth" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eventra | Discover Experiences</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600;700&amp;family=Manrope:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+        .refined-border {
+            border: 1px solid transparent;
+            background: linear-gradient(to bottom right, rgba(208, 188, 255, 0.2), transparent) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+        }
+        .mesh-gradient-bg {
+            background: radial-gradient(circle at 20% 30%, rgba(109, 59, 215, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(76, 215, 246, 0.1) 0%, transparent 50%);
+        }
+        body {
+            background-color: #050505;
+        }
+        /* Dashboard specific fallback */
+        .glass-ui {
+            background: rgba(5, 5, 5, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #userEventsContainer .event-card {
+            background: rgba(20, 20, 20, 0.8) !important;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+        }
+        #userEventsContainer .event-card:hover { transform: scale(1.02); }
+        #userEventsContainer .event-card img { border-bottom: 3px solid #d0bcff; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-overlay:not(.hidden) { display: flex !important; }
+        .hidden { display: none !important; }
+        .modal-content { width: 90%; max-width: 550px; background: #0f172a; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 2.5rem; position: relative; color: white; }
+        .modal-close { position: absolute; top: 1.2rem; right: 1.5rem; font-size: 1.8rem; cursor: pointer; background: none; border: none; color: #fff;}
+        .chat-widget { transition: transform 0.4s; }
+        .chat-widget.collapsed { transform: translateY(calc(100% - 49px)) !important; }
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #555; border-radius: 10px; }
+        .chat-message { padding: 0.8rem 1.2rem; border-radius: 16px; font-size: 0.95rem; width: fit-content; max-width: 85%; word-wrap: break-word; line-height: 1.4; margin-bottom: 0.6rem; }
+        .chat-message.self { background: #6d3bd7; color: white; border-bottom-right-radius: 4px; margin-left: auto; }
+        .chat-message.other { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-bottom-left-radius: 4px; margin-right: auto; }
+        
+        /* Vibe Discovery Animations */
+        .vibe-card { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-out; position: absolute; width: 100%; height: 100%; top: 0; left: 0; transform-origin: 50% 100%; }
+        .swipe-left { transform: translateX(-150%) rotate(-25deg) !important; opacity: 0; }
+        .swipe-right { transform: translateX(150%) rotate(25deg) !important; opacity: 0; }
+        .vibe-deck { position: relative; width: 100%; max-width: 400px; height: 500px; margin: 0 auto; perspective: 1000px; }
+        
+        /* Time-based Themes */
+        body.theme-morning { background-color: #f0fdfa !important; color: #022c22 !important; }
+        body.theme-morning .mesh-gradient-bg { background: radial-gradient(circle at 20% 30%, rgba(167, 243, 208, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(125, 211, 252, 0.3) 0%, transparent 50%); }
+        body.theme-morning .glass-ui, body.theme-morning .event-card { background: rgba(255, 255, 255, 0.85) !important; border-color: rgba(0,0,0,0.1); color: #022c22 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        body.theme-morning h1, body.theme-morning h2, body.theme-morning h3, body.theme-morning h4, body.theme-morning p { color: #022c22 !important; }
+        body.theme-morning .text-white { color: #022c22 !important; }
+        body.theme-morning .text-stone-400, body.theme-morning .text-stone-500 { color: #475569 !important; }
+        body.theme-morning .bg-stone-950\/60, body.theme-morning .bg-stone-950\/40, body.theme-morning .bg-stone-950\/20 { background-color: rgba(255, 255, 255, 0.5) !important; }
+        
+        body.theme-afternoon { background-color: #fffbeb !important; color: #451a03 !important; }
+        body.theme-afternoon .mesh-gradient-bg { background: radial-gradient(circle at 20% 30%, rgba(253, 230, 138, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(252, 165, 165, 0.3) 0%, transparent 50%); }
+        body.theme-afternoon .glass-ui, body.theme-afternoon .event-card { background: rgba(255, 255, 255, 0.85) !important; border-color: rgba(0,0,0,0.1); color: #451a03 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        body.theme-afternoon h1, body.theme-afternoon h2, body.theme-afternoon h3, body.theme-afternoon h4, body.theme-afternoon p { color: #451a03 !important; }
+        body.theme-afternoon .text-white { color: #451a03 !important; }
+        body.theme-afternoon .text-stone-400, body.theme-afternoon .text-stone-500 { color: #78350f !important; }
+        body.theme-afternoon .bg-stone-950\/60, body.theme-afternoon .bg-stone-950\/40, body.theme-afternoon .bg-stone-950\/20 { background-color: rgba(255, 255, 255, 0.5) !important; }
+        
+        /* Micro-animations */
+        .btn-press { transform: scale(0.92) !important; transition: transform 0.1s !important; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#273647",
+                      "on-background": "#d4e4fa",
+                      "primary-container": "#a078ff",
+                      "on-secondary-container": "#00424e",
+                      "secondary-container": "#03b5d3",
+                      "surface-dim": "#051424",
+                      "primary-fixed-dim": "#d0bcff",
+                      "on-tertiary": "#313030",
+                      "surface-tint": "#d0bcff",
+                      "inverse-surface": "#d4e4fa",
+                      "on-tertiary-fixed": "#1c1b1b",
+                      "surface-container-lowest": "#010f1f",
+                      "on-secondary": "#003640",
+                      "on-secondary-fixed-variant": "#004e5c",
+                      "on-primary-fixed": "#23005c",
+                      "on-error": "#690005",
+                      "inverse-on-surface": "#233143",
+                      "secondary-fixed-dim": "#4cd7f6",
+                      "surface": "#051424",
+                      "on-tertiary-fixed-variant": "#474646",
+                      "tertiary-fixed-dim": "#c9c6c5",
+                      "secondary": "#4cd7f6",
+                      "tertiary-container": "#929090",
+                      "inverse-primary": "#6d3bd7",
+                      "on-primary-container": "#340080",
+                      "tertiary-fixed": "#e5e2e1",
+                      "surface-bright": "#2c3a4c",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-low": "#0d1c2d",
+                      "on-surface-variant": "#cbc3d7",
+                      "tertiary": "#c9c6c5",
+                      "on-primary-fixed-variant": "#5516be",
+                      "surface-container-highest": "#273647",
+                      "on-surface": "#d4e4fa",
+                      "secondary-fixed": "#acedff",
+                      "outline-variant": "#494454",
+                      "error-container": "#93000a",
+                      "primary": "#d0bcff",
+                      "background": "#051424",
+                      "on-primary": "#3c0091",
+                      "primary-fixed": "#e9ddff",
+                      "surface-container-high": "#1c2b3c",
+                      "surface-container": "#122131",
+                      "on-tertiary-container": "#2a2a29",
+                      "outline": "#958ea0",
+                      "on-secondary-fixed": "#001f26",
+                      "error": "#ffb4ab"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-max": "1440px",
+                      "gutter": "32px",
+                      "margin-x": "64px",
+                      "section-gap": "128px",
+                      "unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Noto Serif"],
+                      "headline-lg": ["Noto Serif"],
+                      "label-caps": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "display-xl": ["Noto Serif"]
+              },
+              "fontSize": {
+                      "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                      "headline-lg": ["48px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "display-xl": ["72px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+<!-- Mesh Background Decor -->
+<div class="fixed inset-0 z-0 mesh-gradient-bg pointer-events-none opacity-50"></div>
+
+<!-- Side Navigation Shell -->
+<nav class="fixed left-0 top-0 h-full w-72 bg-stone-950/60 backdrop-blur-2xl border-r border-white/10 z-50 flex flex-col pt-24 pb-8 px-6 space-y-4 shadow-2xl shadow-black font-serif text-sm antialiased hidden lg:flex">
+<div class="mb-8 px-2">
+<span class="text-lg font-black text-violet-400">Eventra Hub</span>
+<p class="text-stone-500 text-xs mt-1" id="userNameDisplay">Member</p>
+</div>
+<div class="flex-1 flex flex-col space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-stone-500 hover:text-stone-200 hover:bg-white/5 transition-all duration-200" href="#dashboard">
+<span class="material-symbols-outlined text-violet-500">dashboard_customize</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg bg-gradient-to-r from-violet-600/20 to-transparent border-l-2 border-violet-500 text-white transition-all duration-300" href="#curations">
+<span class="material-symbols-outlined text-violet-500">layers</span>
+<span>Curations</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-stone-500 hover:text-stone-200 hover:bg-white/5 transition-all duration-200" href="#timeline">
+<span class="material-symbols-outlined text-violet-500">auto_graph</span>
+<span>Timeline</span>
+</a>
+</div>
+
+<div class="p-4 bg-stone-900 rounded-xl mb-4 border border-white/5 text-center">
+    <p class="font-bold text-stone-500 mb-1">My Tickets</p>
+    <p class="text-3xl font-serif text-violet-400 font-black" id="ticketCount">0</p>
+</div>
+
+<div class="pt-8 border-t border-white/5 flex flex-col space-y-2">
+<a class="flex items-center gap-4 px-4 py-2 text-stone-500 hover:text-stone-200 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<button id="logoutBtn" class="flex items-center gap-4 px-4 py-2 text-stone-500 hover:text-red-400 transition-colors cursor-pointer w-full text-left">
+<span class="material-symbols-outlined">logout</span>
+<span>Sign Out</span>
+</button>
+</div>
+</nav>
+
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-40 bg-stone-950/40 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.05)]">
+<div class="flex justify-between items-center h-20 px-8 lg:pl-80 w-full">
+<div class="flex items-center">
+    <img src="logo.jpeg" alt="Eventra Logo" class="h-16 w-auto object-contain mix-blend-screen filter drop-shadow-lg">
+</div>
+<div class="flex items-center space-x-8">
+<div class="relative hidden lg:block">
+<input class="bg-white/5 border border-white/10 rounded-full px-6 py-2 w-64 text-sm focus:outline-none focus:border-cyan-400 transition-all text-white" id="searchLocation" placeholder="Search archives..." type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-2 text-stone-500 text-sm">search</span>
+</div>
+<div class="flex items-center space-x-6 text-stone-400">
+<button class="hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined">auto_awesome</span>
+</button>
+<div class="h-10 w-10 rounded-full border border-violet-500/50 p-0.5">
+<img class="w-full h-full rounded-full object-cover" src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+
+<main class="lg:pl-72 pt-20 relative z-10 w-full overflow-hidden">
+<!-- Hero Section -->
+<section id="dashboard" class="relative h-[819px] w-full overflow-hidden">
+<div class="absolute inset-0">
+<img class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9kRf9SYvQo3eJ8xlWFc1Wf4xe464iT0K9-ix7pi2GDPGRauqAuGDP0OfTJ3qMcP7jOgfcuU5uqxdRuT4E_lxcYam6h8d_2VInP6cl3AtzAfk0Wu9WxfczALv3iNbqWSaHiHb7DeMQOdDrY9hvwCmhw5Vg8b2dhfYExB3JGSgHJMkByjl4hAxba1wX7QGEGTVIuNXMA_rShVfi4FUwSqcbcBfsZ-1oKSOzXkc-LnCx9YznvBkHXpKbkI72MAF4c4WaoCv2kfm6aaSm"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-background via-transparent to-transparent"></div>
+</div>
+<div class="relative h-full flex flex-col justify-center px-8 lg:px-margin-x max-w-4xl">
+<div class="inline-flex items-center space-x-2 bg-violet-600/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-violet-500/30 mb-8 w-fit">
+<span class="material-symbols-outlined text-xs text-violet-400" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="text-label-caps text-[10px] text-violet-200">NEW SEASON PREMIERE</span>
+</div>
+<h1 class="font-display-xl text-5xl lg:text-7xl text-white mb-6">Discover the Art of <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-300">Unseen</span> Experiences</h1>
+<p class="font-body-lg text-lg text-stone-400 mb-10 leading-relaxed max-w-2xl">
+    A curated sanctuary for world-class planners. Access the most prestigious venues and visionary concepts across the globe.
+</p>
+</div>
+</section>
+
+<!-- Vibe Discovery Section -->
+<section id="vibe-discovery" class="px-8 lg:px-margin-x py-12">
+<div class="glass-ui p-8 rounded-3xl border border-white/5 relative overflow-hidden flex flex-col items-center">
+    <div class="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-cyan-400/10 z-0"></div>
+    <div class="relative z-10 w-full text-center mb-8">
+        <h2 class="font-headline-lg text-4xl text-white mb-2">Vibe Discovery</h2>
+        <p class="text-stone-400 font-body-md">Swipe right to wishlist, swipe left to skip. Find your perfect event.</p>
+    </div>
+    
+    <div class="relative z-10 vibe-deck" id="vibeDeckContainer">
+        <!-- Vibe cards injected here via JS -->
+        <div id="vibeEmptyState" class="absolute inset-0 flex flex-col items-center justify-center text-center hidden">
+            <span class="material-symbols-outlined text-6xl text-violet-400 mb-4">celebration</span>
+            <h3 class="text-xl font-bold text-white mb-2">You're all caught up!</h3>
+            <p class="text-stone-400 text-sm">Check back later for new event vibes.</p>
+        </div>
+    </div>
+
+    <div class="relative z-10 flex gap-6 mt-8">
+        <button id="vibeSkipBtn" class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-red-400 hover:bg-red-400/20 hover:border-red-400/50 transition-all shadow-lg backdrop-blur-md">
+            <span class="material-symbols-outlined text-3xl">close</span>
+        </button>
+        <button id="vibeLikeBtn" class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-green-400 hover:bg-green-400/20 hover:border-green-400/50 transition-all shadow-lg backdrop-blur-md">
+            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">favorite</span>
+        </button>
+    </div>
+</div>
+</section>
+
+<!-- Upcoming Events Section (JS Hooked) -->
+<section id="curations" class="px-8 lg:px-margin-x py-16 bg-stone-950/20">
+<div class="flex justify-between items-end mb-16">
+<div>
+<h2 class="font-headline-lg text-4xl text-white mb-4">Curated Events</h2>
+<p class="text-stone-500 font-body-md">Hand-selected visions based on your creative portfolio.</p>
+</div>
+</div>
+<!-- Container where events will be dynamically added via js/user.js -->
+<div id="userEventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <p class="text-stone-500">Loading dynamic events...</p>
+</div>
+</section>
+
+<!-- Feedback Section -->
+<section id="timeline" class="px-8 lg:px-margin-x py-16">
+<div class="glass-ui p-8 rounded-2xl border border-white/5">
+    <h2 class="font-headline-lg text-3xl text-white mb-4"><i class="fa-solid fa-bullhorn text-violet-400 mr-2"></i> Platform Feedback</h2>
+    <p class="text-stone-400 mb-6">Have thoughts on Eventra or our wonderful Hosts? Let us know!</p>
+    
+    <div class="flex flex-col gap-4">
+    <textarea id="feedbackText" class="w-full bg-white/5 border border-white/10 rounded-lg p-4 text-white focus:outline-none focus:border-violet-500 transition-colors" rows="3" placeholder="Write your feedback here..."></textarea>
+    <button id="submitFeedbackBtn" class="bg-primary text-on-primary font-bold py-3 px-6 rounded-lg self-start hover:shadow-[0_0_15px_rgba(208,188,255,0.4)] transition-all">Submit Feedback</button>
+    </div>
+    <p id="feedbackAlert" class="hidden text-cyan-400 font-bold mt-4">Feedback submitted successfully!</p>
+    
+    <h3 class="mt-8 pt-6 border-t border-white/10 font-bold text-lg text-white">Community Feedback</h3>
+    <div id="userCommunityFeedback" class="mt-4 max-h-[300px] overflow-y-auto bg-black/20 p-6 rounded-xl border border-white/5">
+        <p class="text-stone-500">No community feedback yet.</p>
+    </div>
+</div>
+</section>
+
+</main>
+
+  <!-- Checkout/Payment Modal -->
+  <div id="paymentModal" class="modal-overlay hidden z-[2000]">
+    <div class="modal-content glass-ui">
+      <button class="modal-close" onclick="document.getElementById('paymentModal').classList.add('hidden')">&times;</button>
+      <h2 class="text-2xl font-bold text-white mb-2"><i class="fa-solid fa-lock text-violet-400 mr-2"></i>Secure Checkout</h2>
+      <p class="text-stone-400 text-sm mb-6">Complete payment to generate your ticket.</p>
+      
+      <div class="bg-black/30 p-4 rounded-xl border border-white/5 mb-6 text-white">
+        <p class="flex justify-between mb-2"><span class="text-stone-400">Ticket Price:</span> <span id="checkoutPrice">₹0</span></p>
+        <p class="flex justify-between text-lg font-bold border-t border-white/10 pt-2"><span class="text-stone-300">Total Amount:</span> <span class="text-cyan-400" id="checkoutTotal">₹0</span></p>
+      </div>
+
+      <div id="paymentMethods" class="flex flex-col gap-4">
+        <div class="text-left mb-2">
+          <label for="ticketQuantity" class="block font-bold mb-2 text-stone-400 text-sm">Number of Tickets (Max 10)</label>
+          <input type="number" id="ticketQuantity" class="w-full bg-white/5 border border-white/10 text-white rounded-lg px-4 py-2" value="1" min="1" max="10">
+        </div>
+        <input type="hidden" id="payEventId">
+        <input type="hidden" id="payEventPrice">
+        
+        <button id="gpayBtn" class="wallet-btn bg-white text-stone-800 py-3 rounded-lg font-bold flex items-center justify-center hover:bg-stone-200 transition-colors">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="GPay" style="height:20px; margin-right:10px;"> Pay with Google
+        </button>
+        <button id="phonepeBtn" class="wallet-btn bg-[#5f259f] text-white py-3 rounded-lg font-bold flex items-center justify-center hover:opacity-90 transition-opacity">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style="height:20px; filter:brightness(0) invert(1); margin-right:10px;"> PhonePe
+        </button>
+      </div>
+      <p id="processingText" class="hidden text-violet-400 text-center mt-4 font-bold">Processing Payment Securely...</p>
+    </div>
+  </div>
+
+  <!-- Ticket/QR Modal -->
+  <div id="ticketModal" class="modal-overlay hidden z-[2000]">
+    <div class="modal-content glass-ui text-center">
+      <button class="modal-close" onclick="document.getElementById('ticketModal').classList.add('hidden')">&times;</button>
+      <h2 class="text-2xl font-bold text-cyan-400 mb-2">Payment Successful!</h2>
+      <p class="text-stone-400 text-sm mb-6">Here is your official QR Ticket Link.</p>
+      
+      <div id="qrTicketContainer" class="inline-block p-6 bg-white rounded-xl shadow-lg border border-stone-100">
+        <img id="qrImage" src="" alt="QR Code Link" class="w-[200px] h-[200px] rounded-lg">
+        <h3 id="ticketTitle" class="mt-4 font-bold text-stone-800">Event Title</h3>
+      </div>
+      <div class="mt-8 flex justify-center gap-4">
+        <button class="bg-primary text-on-primary font-bold py-2 px-6 rounded-lg hover:shadow-[0_0_15px_rgba(208,188,255,0.4)] transition-all" onclick="window.location.href='ticket.html?eventId=' + document.getElementById('payEventId').value">View Page</button>
+        <button class="bg-white/10 border border-white/20 text-white font-bold py-2 px-6 rounded-lg hover:bg-white/20 transition-all" onclick="document.getElementById('ticketModal').classList.add('hidden')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Matchmaking Modal -->
+  <div id="matchmakingModal" class="modal-overlay hidden z-[2000]">
+    <div class="modal-content glass-ui text-center">
+      <button class="modal-close" onclick="document.getElementById('matchmakingModal').classList.add('hidden')">&times;</button>
+      <h2 class="text-2xl font-bold text-violet-400 mb-2">Attendee Matchmaking</h2>
+      <p class="text-stone-400 text-sm mb-6">Connect with others attending this event!</p>
+      
+      <div id="matchmakingList" class="flex flex-col gap-4 max-h-[300px] overflow-y-auto p-2 text-left">
+        <!-- populated via js -->
+      </div>
+      
+      <div class="mt-6 pt-4 border-t border-white/10">
+        <label class="flex items-center justify-center gap-2 cursor-pointer">
+          <input type="checkbox" id="optInMatchmaking" class="rounded bg-white/5 border-white/20 text-violet-500 focus:ring-0">
+          <span class="text-sm text-stone-300">Make my profile visible to other attendees</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Widget (Leverages old style.css structure mostly for toggles if needed) -->
+  <div id="chatWidget" class="chat-widget collapsed glass-ui" style="position:fixed; bottom:20px; right:20px; width:300px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; z-index:9999;">
+      <div class="chat-header p-3 bg-violet-900/50 cursor-pointer flex justify-between font-bold text-white border-b border-white/10" onclick="document.getElementById('chatWidget').classList.toggle('collapsed')">
+          <span>Eventra Chatbooth</span>
+          <span>🤖</span>
+      </div>
+      <div class="chat-messages bg-black/50 h-[250px] overflow-y-auto p-3" id="chatMessages">
+          <!-- Messages load here -->
+      </div>
+      <div class="chat-input-area border-t border-white/10 bg-black/80 flex p-2 gap-2" style="display:flex;">
+          <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 bg-white/10 border-none text-white rounded px-2 focus:outine-none">
+          <button id="chatSend" class="bg-violet-600 text-white px-3 py-1 rounded">➤</button>
+      </div>
+  </div>
+
+  <!-- Hidden Audio Elements for Micro-interactions -->
+  <audio id="soundClick" src="https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3" preload="auto"></audio>
+  <audio id="soundSuccess" src="https://assets.mixkit.co/active_storage/sfx/2574/2574-preview.mp3" preload="auto"></audio>
+  <audio id="soundSwipe" src="https://assets.mixkit.co/active_storage/sfx/166/166-preview.mp3" preload="auto"></audio>
+
+</body>
+<!-- The user JS uses common.js and user.js -->
+<script src="js/common.js"></script>
+<script src="js/user.js?v=3"></script>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eventra | The Visionary Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600;700&amp;family=Manrope:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#273647",
+                        "on-background": "#d4e4fa",
+                        "primary-container": "#a078ff",
+                        "on-secondary-container": "#00424e",
+                        "secondary-container": "#03b5d3",
+                        "surface-dim": "#051424",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-tertiary": "#313030",
+                        "surface-tint": "#d0bcff",
+                        "inverse-surface": "#d4e4fa",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "surface-container-lowest": "#010f1f",
+                        "on-secondary": "#003640",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-primary-fixed": "#23005c",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#233143",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface": "#051424",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "tertiary-fixed-dim": "#c9c6c5",
+                        "secondary": "#4cd7f6",
+                        "tertiary-container": "#929090",
+                        "inverse-primary": "#6d3bd7",
+                        "on-primary-container": "#340080",
+                        "tertiary-fixed": "#e5e2e1",
+                        "surface-bright": "#2c3a4c",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#0d1c2d",
+                        "on-surface-variant": "#cbc3d7",
+                        "tertiary": "#c9c6c5",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-highest": "#273647",
+                        "on-surface": "#d4e4fa",
+                        "secondary-fixed": "#acedff",
+                        "outline-variant": "#494454",
+                        "error-container": "#93000a",
+                        "primary": "#d0bcff",
+                        "background": "#051424",
+                        "on-primary": "#3c0091",
+                        "primary-fixed": "#e9ddff",
+                        "surface-container-high": "#1c2b3c",
+                        "surface-container": "#122131",
+                        "on-tertiary-container": "#2a2a29",
+                        "outline": "#958ea0",
+                        "on-secondary-fixed": "#001f26",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "gutter": "32px",
+                        "margin-x": "64px",
+                        "section-gap": "128px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Noto Serif"],
+                        "headline-lg": ["Noto Serif"],
+                        "label-caps": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "display-xl": ["Noto Serif"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                        "headline-lg": ["48px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "display-xl": ["72px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .refined-border {
+            border: 1px solid transparent;
+            background: linear-gradient(to bottom right, rgba(208, 188, 255, 0.2), rgba(5, 5, 5, 0)) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+        }
+        .glass-surface {
+            background: rgba(5, 5, 5, 0.4);
+            backdrop-filter: blur(20px);
+        }
+        .mesh-canvas {
+            background: radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                        #050505;
+        }
+        .hidden-auth { display: none !important; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md overflow-x-hidden min-h-screen">
+<!-- Mesh Background Layer -->
+<div class="fixed inset-0 z-0 mesh-canvas">
+<div class="absolute inset-0 opacity-40 mix-blend-overlay"></div>
+</div>
+
+<!-- Main Content Container -->
+<main class="relative z-10 flex min-h-screen items-center justify-center px-margin-x">
+<div class="w-full max-w-container-max flex flex-col md:flex-row items-center gap-gutter">
+<!-- Left Side: Brand Narrative (Asymmetric Layout) -->
+<div class="hidden md:flex flex-col flex-1 space-y-unit max-w-xl">
+<span class="font-label-caps text-label-caps text-secondary tracking-[0.2em] mb-4">THE VISIONARY HUB</span>
+<h1 class="font-display-xl text-display-xl text-on-background mb-2">
+    <img src="logo.jpeg" alt="Eventra Logo" class="h-40 w-auto object-contain mix-blend-screen filter drop-shadow-2xl">
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">
+    Where avant-garde aesthetics meet surgical precision in event planning. Enter your private digital gallery.
+</p>
+<div class="pt-8 flex gap-4">
+<div class="w-12 h-1 bg-primary rounded-full"></div>
+<div class="w-4 h-1 bg-surface-variant rounded-full"></div>
+<div class="w-4 h-1 bg-surface-variant rounded-full"></div>
+</div>
+</div>
+<!-- Right Side: Login Card -->
+<div class="w-full max-w-md my-8">
+<div class="glass-surface p-10 rounded-xl relative overflow-hidden shadow-2xl">
+<!-- Refined Border Implementation -->
+<div class="absolute inset-0 rounded-xl pointer-events-none border border-white/10"></div>
+
+<!-- LOGIN SECTION -->
+<div id="loginSection" class="relative z-10 space-y-8">
+    <div class="text-center md:text-left">
+    <h2 class="font-headline-md text-headline-md text-on-background">Welcome Back</h2>
+    <p class="font-body-md text-body-md text-on-surface-variant">Sign in to your visionary workspace</p>
+    <div id="loginAlert" class="hidden mt-4 p-3 rounded text-sm text-error bg-[#3a0004] border border-error"></div>
+    </div>
+    
+    <form id="loginForm" class="space-y-6">
+    <div class="space-y-1.5 group">
+    <label class="font-label-caps text-label-caps text-on-surface-variant" for="loginEmail">IDENTITY</label>
+    <div class="relative">
+    <input class="w-full bg-transparent border-0 border-b border-white/20 px-0 py-3 text-on-background placeholder:text-stone-600 focus:ring-0 focus:border-secondary transition-all outline-none font-body-md" id="loginEmail" placeholder="curator@eventra.io" type="email" required/>
+    <div class="absolute bottom-0 left-0 h-0.5 w-0 bg-secondary group-focus-within:w-full transition-all duration-500"></div>
+    </div>
+    </div>
+    <div class="space-y-1.5 group">
+    <label class="font-label-caps text-label-caps text-on-surface-variant" for="loginPassword">ACCESS KEY</label>
+    <div class="relative">
+    <input class="w-full bg-transparent border-0 border-b border-white/20 px-0 py-3 text-on-background placeholder:text-stone-600 focus:ring-0 focus:border-secondary transition-all outline-none font-body-md" id="loginPassword" placeholder="••••••••••••" type="password" required/>
+    <div class="absolute bottom-0 left-0 h-0.5 w-0 bg-secondary group-focus-within:w-full transition-all duration-500"></div>
+    </div>
+    </div>
+    
+    <div class="flex items-center justify-between">
+    <label class="flex items-center gap-2 cursor-pointer">
+    <input class="w-4 h-4 rounded border-white/20 bg-transparent text-primary focus:ring-primary focus:ring-offset-0" type="checkbox"/>
+    <span class="text-[12px] text-on-surface-variant">Remember device</span>
+    </label>
+    <a class="text-[12px] text-secondary hover:underline underline-offset-4" href="#">Reset Access</a>
+    </div>
+
+    <!-- CTA Button -->
+    <button type="submit" class="w-full py-4 bg-primary text-on-primary font-label-caps text-label-caps tracking-widest rounded-lg hover:shadow-[0_0_20px_rgba(160,120,255,0.4)] transition-all duration-300 transform active:scale-[0.98]">
+        ENTER WORKSPACE
+    </button>
+    </form>
+    
+    <!-- Footer Links -->
+    <div class="pt-4 text-center">
+    <p class="font-body-md text-sm text-on-surface-variant">
+        New to the elite circle? 
+        <a id="showRegister" class="text-primary font-bold hover:underline underline-offset-4 ml-1 cursor-pointer">Request Membership</a>
+    </p>
+    </div>
+</div>
+
+<!-- REGISTER SECTION -->
+<div id="registerSection" class="relative z-10 space-y-6 hidden-auth">
+    <div class="text-center md:text-left">
+    <h2 class="font-headline-md text-headline-md text-on-background">Request Membership</h2>
+    <div id="registerAlert" class="hidden mt-2 p-3 rounded text-sm text-error bg-[#3a0004] border border-error"></div>
+    </div>
+    
+    <!-- Role Selector -->
+    <div class="space-y-3">
+    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Select Persona</label>
+    <input type="hidden" id="registerRole" value="user">
+    <div class="grid grid-cols-3 gap-3">
+    <button type="button" class="role-btn active-role flex flex-col items-center justify-center p-3 rounded-lg border border-primary bg-primary/10 text-primary transition-all" data-role="user">
+    <span class="material-symbols-outlined mb-1">person</span>
+    <span class="text-[10px] font-bold">USER</span>
+    </button>
+    <button type="button" class="role-btn flex flex-col items-center justify-center p-3 rounded-lg border border-white/5 bg-white/5 text-on-surface-variant hover:border-white/20 transition-all" data-role="host">
+    <span class="material-symbols-outlined mb-1">stadium</span>
+    <span class="text-[10px] font-bold">HOST</span>
+    </button>
+    <button type="button" class="role-btn flex flex-col items-center justify-center p-3 rounded-lg border border-white/5 bg-white/5 text-on-surface-variant hover:border-white/20 transition-all" data-role="admin">
+    <span class="material-symbols-outlined mb-1">admin_panel_settings</span>
+    <span class="text-[10px] font-bold">ADMIN</span>
+    </button>
+    </div>
+    </div>
+
+    <!-- Form Fields -->
+    <form id="registerForm" class="space-y-5">
+    <div class="space-y-1 group">
+    <label class="font-label-caps text-[10px] text-on-surface-variant tracking-wider" for="registerName">FULL NAME</label>
+    <input class="w-full bg-transparent border-0 border-b border-white/20 px-0 py-2 text-on-background placeholder:text-stone-600 focus:ring-0 focus:border-secondary transition-all outline-none" id="registerName" placeholder="Jane Doe" type="text" required/>
+    </div>
+    
+    <div class="space-y-1 group">
+    <label class="font-label-caps text-[10px] text-on-surface-variant tracking-wider" for="registerEmail">EMAIL</label>
+    <input class="w-full bg-transparent border-0 border-b border-white/20 px-0 py-2 text-on-background placeholder:text-stone-600 focus:ring-0 focus:border-secondary transition-all outline-none" id="registerEmail" placeholder="you@example.com" type="email" required/>
+    </div>
+    
+    <div class="space-y-1 group">
+    <label class="font-label-caps text-[10px] text-on-surface-variant tracking-wider" for="registerPassword">PASSWORD</label>
+    <input class="w-full bg-transparent border-0 border-b border-white/20 px-0 py-2 text-on-background placeholder:text-stone-600 focus:ring-0 focus:border-secondary transition-all outline-none" id="registerPassword" placeholder="••••••••" type="password" required minlength="6"/>
+    </div>
+    
+    <!-- CTA Button -->
+    <button type="submit" class="w-full mt-4 py-4 bg-primary text-on-primary font-label-caps text-label-caps tracking-widest rounded-lg hover:shadow-[0_0_20px_rgba(160,120,255,0.4)] transition-all duration-300 transform active:scale-[0.98]">
+        JOIN NOW
+    </button>
+    </form>
+    
+    <div class="pt-4 text-center border-t border-white/10">
+    <p class="font-body-md text-sm text-on-surface-variant">
+        Already a member? 
+        <a id="showLogin" class="text-primary font-bold hover:underline underline-offset-4 ml-1 cursor-pointer">Sign In</a>
+    </p>
+    </div>
+</div>
+
+</div>
+<!-- Decorative Mesh Fade In Card -->
+<div class="absolute -bottom-20 -right-20 w-64 h-64 bg-secondary/10 blur-[80px] rounded-full pointer-events-none"></div>
+</div>
+</div>
+</main>
+<!-- Custom Glow Cursor Decor (Static Representation) -->
+<div class="fixed top-1/2 left-1/4 w-96 h-96 bg-primary/5 blur-[120px] rounded-full -z-10"></div>
+<div class="fixed bottom-1/4 right-1/4 w-80 h-80 bg-secondary/5 blur-[100px] rounded-full -z-10"></div>
+
+<script src="js/auth.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const roleBtns = document.querySelectorAll('.role-btn');
+        const roleInput = document.getElementById('registerRole');
+        
+        const loginSection = document.getElementById('loginSection');
+        const registerSection = document.getElementById('registerSection');
+        const showRegisterBtn = document.getElementById('showRegister');
+        const showLoginBtn = document.getElementById('showLogin');
+        
+        showRegisterBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginSection.classList.add('hidden-auth');
+            registerSection.classList.remove('hidden-auth');
+        });
+        
+        showLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerSection.classList.add('hidden-auth');
+            loginSection.classList.remove('hidden-auth');
+        });
+
+        roleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // reset all buttons
+                roleBtns.forEach(b => {
+                    b.classList.remove('border-primary', 'bg-primary/10', 'text-primary');
+                    b.classList.add('border-white/5', 'bg-white/5', 'text-on-surface-variant');
+                });
+                // select this one
+                btn.classList.add('border-primary', 'bg-primary/10', 'text-primary');
+                btn.classList.remove('border-white/5', 'bg-white/5', 'text-on-surface-variant');
+                // update hidden input
+                roleInput.value = btn.getAttribute('data-role');
+            });
+        });
+    });
+</script>
+</body>
+</html>

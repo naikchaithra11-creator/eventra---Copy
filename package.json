@@ -1,0 +1,18 @@
+{
+  "name": "eventra",
+  "version": "1.0.0",
+  "description": "Event Planning Hub",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.5.0",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.5"
+  }
+}
