@@ -37,7 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    
+    // Add default users if none exist to prevent login issues with old accounts
+    if (users.length === 0) {
+      users = [
+        { name: 'Admin User', email: 'admin@eventra.com', password: 'password', role: 'admin' },
+        { name: 'Host User', email: 'host@eventra.com', password: 'password', role: 'host' },
+        { name: 'Regular User', email: 'user@eventra.com', password: 'password', role: 'user' }
+      ];
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
     const user = users.find(u => u.email === email && u.password === password);
 
     if (user) {
@@ -77,6 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
       registerForm.classList.add('hidden');
       loginForm.classList.remove('hidden');
       registerAlert.classList.add('hidden');
+      
+      const loginSec = document.getElementById('loginSection');
+      const regSec = document.getElementById('registerSection');
+      if (loginSec) loginSec.classList.remove('hidden');
+      if (regSec) regSec.classList.add('hidden');
     }, 2000);
   });
 });

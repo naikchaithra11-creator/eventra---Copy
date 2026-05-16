@@ -32,6 +32,18 @@ db.exec(`
     event_date TEXT NOT NULL,
     notified BOOLEAN DEFAULT 0
   );
+
+  CREATE TABLE IF NOT EXISTS tickets (
+    id TEXT PRIMARY KEY,
+    user_email TEXT NOT NULL,
+    user_name TEXT,
+    event_id TEXT NOT NULL,
+    event_title TEXT NOT NULL,
+    event_date TEXT NOT NULL,
+    event_location TEXT,
+    scanned BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 module.exports = db;

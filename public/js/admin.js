@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
       users.forEach(u => {
         const div = document.createElement('div');
         div.style.cssText = 'padding: 0.5rem; border-bottom: 1px solid rgba(233, 213, 255, 0.4); display: flex; justify-content: space-between;';
-        div.innerHTML = `<span><strong>${u.name}</strong> (${u.email})</span> <span style="text-transform: capitalize; font-size: 0.8rem; background: var(--accent-primary); color: white; padding: 2px 8px; border-radius: 12px;">${u.role}</span>`;
+        div.innerHTML = `<span><strong>${u.name}</strong> (${u.email})</span> <span style="text-transform: capitalize; font-size: 0.8rem; background: var(--teal); color: white; padding: 2px 8px; border-radius: 12px;">${u.role}</span>`;
         usersListContainer.appendChild(div);
       });
     }
@@ -126,17 +126,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+    const eventReviews = JSON.parse(localStorage.getItem('eventReviews')) || [];
     const feedbackListContainer = document.getElementById('adminFeedbackList');
     if (feedbackListContainer) {
       feedbackListContainer.innerHTML = '';
-      if (feedbacks.length === 0) {
-        feedbackListContainer.innerHTML = '<p style="color: var(--text-muted);">No feedback has been submitted yet.</p>';
+      
+      const allReviewsAndFeedback = [
+        ...feedbacks.map(f => ({...f, type: 'Platform Feedback'})),
+        ...eventReviews.map(r => {
+           const evt = events.find(e => e.id === r.eventId);
+           return {...r, type: `Event Review: ${evt ? evt.title : 'Unknown Event'}`};
+        })
+      ].sort((a, b) => b.timestamp - a.timestamp);
+
+      if (allReviewsAndFeedback.length === 0) {
+        feedbackListContainer.innerHTML = '<p style="color: var(--text-muted);">No feedback or reviews have been submitted yet.</p>';
       } else {
-        feedbacks.slice().reverse().forEach((f) => {
+        allReviewsAndFeedback.forEach((f) => {
           const div = document.createElement('div');
           div.style.cssText = 'padding: 1rem; border-bottom: 1px solid rgba(233, 213, 255, 0.4); background: rgba(255,255,255,0.7); margin-bottom: 10px; border-radius: 8px;';
+          
+          let ratingHtml = '';
+          if (f.rating) {
+            ratingHtml = `<span style="color: gold; margin-left: 10px;">${'⭐'.repeat(f.rating)}</span>`;
+          }
+
           div.innerHTML = `
-            <div style="font-weight:bold; color: #6366F1; margin-bottom: 5px;">${f.userName} <span style="font-size:0.8rem; color:var(--text-muted);">(${f.userEmail})</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+               <div style="font-weight:bold; color: #6366F1;">${f.userName} <span style="font-size:0.8rem; color:var(--text-muted);">${f.userEmail ? '('+f.userEmail+')' : ''}</span>${ratingHtml}</div>
+               <div style="font-size:0.75rem; background: var(--surface2); padding: 2px 8px; border-radius: 12px; color: var(--text-muted);">${f.type}</div>
+            </div>
             <div style="font-size: 0.95rem;">${f.text}</div>
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px; text-align: right;">${new Date(f.timestamp).toLocaleString()}</div>
           `;
@@ -156,6 +175,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const publishedEvents = events.filter(e => e.status === 'published');
 
     // Phase 1 Rendering
+    const pendingCount = stage1Events.length + stage2Events.length;
+    const notifBadge = document.querySelector('.badge-notif');
+    if (notifBadge) {
+      if (pendingCount > 0) {
+        notifBadge.style.display = 'inline-block';
+        notifBadge.textContent = `⚠ ${pendingCount} pending`;
+      } else {
+        notifBadge.style.display = 'none';
+      }
+    }
+
     pendingContainer.innerHTML = '';
     if (stage1Events.length === 0) {
       pendingContainer.innerHTML = '<p style="color: var(--text-muted);">No initial requests.</p>';
@@ -346,9 +376,41 @@ document.addEventListener('DOMContentLoaded', () => {
     loadChat();
   });
 
+  const chatAiBtn = document.getElementById('chatAiBtn');
+  if (chatAiBtn) {
+    chatAiBtn.addEventListener('click', () => {
+      if (!currentChatUser) return;
+      chatAiBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.1rem; animation: spin 1s linear infinite;">sync</span> Thinking...`;
+      
+      setTimeout(() => {
+        chatAiBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size:1.1rem;">auto_awesome</span> AI Reply`;
+        
+        // Analyze recent messages to generate contextual reply
+        const allMessages = JSON.parse(localStorage.getItem('messages')) || [];
+        const conversation = allMessages.filter(m => m.hostId === currentChatUser);
+        const lastUserMsg = conversation.reverse().find(m => m.sender !== 'admin');
+        
+        let aiReply = "Thank you for reaching out! I've reviewed your request and everything looks good. Let me know if you need further assistance.";
+        
+        if (lastUserMsg) {
+            const text = lastUserMsg.text.toLowerCase();
+            if (text.includes('refund') || text.includes('cancel')) {
+                aiReply = "I understand you're inquiring about a cancellation. I can process a refund for your ticket within the next 24 hours. Would you like me to proceed?";
+            } else if (text.includes('approve') || text.includes('publish') || text.includes('proposal')) {
+                aiReply = "Your proposal looks fantastic! I've gone ahead and reviewed the details. You should see it published on the live site momentarily.";
+            } else if (text.includes('ticket') || text.includes('booking')) {
+                aiReply = "Your ticket booking is confirmed and secure! You can view your QR code directly from your dashboard.";
+            }
+        }
+        
+        chatInput.value = aiReply;
+      }, 600);
+    });
+  }
+
   window.addEventListener('storage', (e) => {
     if (e.key === 'messages') loadChat();
-    if (e.key === 'events' || e.key === 'userTickets' || e.key === 'users' || e.key === 'feedbacks') {
+    if (e.key === 'events' || e.key === 'userTickets' || e.key === 'users' || e.key === 'feedbacks' || e.key === 'eventReviews') {
       loadAdminEvents();
     }
   });

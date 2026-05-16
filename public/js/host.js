@@ -81,13 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
       let statusColor = '#eab308'; // Default yellow
       let extraAction = '';
 
-      if (evt.status === 'stage1_pending') { statusString = 'Pending Admin Approval'; }
+      if (evt.status === 'stage1_pending') { statusString = 'Phase 1: Pending Approval'; }
       if (evt.status === 'stage1_approved') { 
-        statusString = 'Needs Full Details'; 
+        statusString = 'Phase 2: Needs Details'; 
         statusColor = '#3b82f6'; // Blue
-        extraAction = `<button class="btn btn-primary p2-btn" data-id="${evt.id}" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Add Details</button>`;
+        extraAction = `<button class="btn btn-primary p2-btn" data-id="${evt.id}" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Submit Phase 2 Details</button>`;
       }
-      if (evt.status === 'stage2_pending') { statusString = 'Pending Final Publish'; statusColor = '#eab308'; }
+      if (evt.status === 'stage2_pending') { statusString = 'Phase 2: Pending Final Publish'; statusColor = '#eab308'; }
       if (evt.status === 'published') { statusString = 'Live'; statusColor = '#22c55e'; }
       if (evt.status === 'rejected') { statusString = 'Rejected by Admin'; statusColor = '#ef4444'; }
 

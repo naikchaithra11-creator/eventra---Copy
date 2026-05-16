@@ -1,417 +1,641 @@
 <!DOCTYPE html>
-<html class="dark scroll-smooth" lang="en">
+<html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Eventra | Discover Experiences</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600;700&amp;family=Manrope:wght@400;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
-        }
-        .refined-border {
-            border: 1px solid transparent;
-            background: linear-gradient(to bottom right, rgba(208, 188, 255, 0.2), transparent) border-box;
-            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: destination-out;
-            mask-composite: exclude;
-        }
-        .mesh-gradient-bg {
-            background: radial-gradient(circle at 20% 30%, rgba(109, 59, 215, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(76, 215, 246, 0.1) 0%, transparent 50%);
-        }
-        body {
-            background-color: #050505;
-        }
-        /* Dashboard specific fallback */
-        .glass-ui {
-            background: rgba(5, 5, 5, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        #userEventsContainer .event-card {
-            background: rgba(20, 20, 20, 0.8) !important;
-            border-radius: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: all 0.3s;
-        }
-        #userEventsContainer .event-card:hover { transform: scale(1.02); }
-        #userEventsContainer .event-card img { border-bottom: 3px solid #d0bcff; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); z-index: 2000; align-items: center; justify-content: center; }
-        .modal-overlay:not(.hidden) { display: flex !important; }
-        .hidden { display: none !important; }
-        .modal-content { width: 90%; max-width: 550px; background: #0f172a; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); padding: 2.5rem; position: relative; color: white; }
-        .modal-close { position: absolute; top: 1.2rem; right: 1.5rem; font-size: 1.8rem; cursor: pointer; background: none; border: none; color: #fff;}
-        .chat-widget { transition: transform 0.4s; }
-        .chat-widget.collapsed { transform: translateY(calc(100% - 49px)) !important; }
-        .chat-messages::-webkit-scrollbar { width: 6px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: #555; border-radius: 10px; }
-        .chat-message { padding: 0.8rem 1.2rem; border-radius: 16px; font-size: 0.95rem; width: fit-content; max-width: 85%; word-wrap: break-word; line-height: 1.4; margin-bottom: 0.6rem; }
-        .chat-message.self { background: #6d3bd7; color: white; border-bottom-right-radius: 4px; margin-left: auto; }
-        .chat-message.other { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-bottom-left-radius: 4px; margin-right: auto; }
-        
-        /* Vibe Discovery Animations */
-        .vibe-card { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-out; position: absolute; width: 100%; height: 100%; top: 0; left: 0; transform-origin: 50% 100%; }
-        .swipe-left { transform: translateX(-150%) rotate(-25deg) !important; opacity: 0; }
-        .swipe-right { transform: translateX(150%) rotate(25deg) !important; opacity: 0; }
-        .vibe-deck { position: relative; width: 100%; max-width: 400px; height: 500px; margin: 0 auto; perspective: 1000px; }
-        
-        /* Time-based Themes */
-        body.theme-morning { background-color: #f0fdfa !important; color: #022c22 !important; }
-        body.theme-morning .mesh-gradient-bg { background: radial-gradient(circle at 20% 30%, rgba(167, 243, 208, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(125, 211, 252, 0.3) 0%, transparent 50%); }
-        body.theme-morning .glass-ui, body.theme-morning .event-card { background: rgba(255, 255, 255, 0.85) !important; border-color: rgba(0,0,0,0.1); color: #022c22 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        body.theme-morning h1, body.theme-morning h2, body.theme-morning h3, body.theme-morning h4, body.theme-morning p { color: #022c22 !important; }
-        body.theme-morning .text-white { color: #022c22 !important; }
-        body.theme-morning .text-stone-400, body.theme-morning .text-stone-500 { color: #475569 !important; }
-        body.theme-morning .bg-stone-950\/60, body.theme-morning .bg-stone-950\/40, body.theme-morning .bg-stone-950\/20 { background-color: rgba(255, 255, 255, 0.5) !important; }
-        
-        body.theme-afternoon { background-color: #fffbeb !important; color: #451a03 !important; }
-        body.theme-afternoon .mesh-gradient-bg { background: radial-gradient(circle at 20% 30%, rgba(253, 230, 138, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(252, 165, 165, 0.3) 0%, transparent 50%); }
-        body.theme-afternoon .glass-ui, body.theme-afternoon .event-card { background: rgba(255, 255, 255, 0.85) !important; border-color: rgba(0,0,0,0.1); color: #451a03 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        body.theme-afternoon h1, body.theme-afternoon h2, body.theme-afternoon h3, body.theme-afternoon h4, body.theme-afternoon p { color: #451a03 !important; }
-        body.theme-afternoon .text-white { color: #451a03 !important; }
-        body.theme-afternoon .text-stone-400, body.theme-afternoon .text-stone-500 { color: #78350f !important; }
-        body.theme-afternoon .bg-stone-950\/60, body.theme-afternoon .bg-stone-950\/40, body.theme-afternoon .bg-stone-950\/20 { background-color: rgba(255, 255, 255, 0.5) !important; }
-        
-        /* Micro-animations */
-        .btn-press { transform: scale(0.92) !important; transition: transform 0.1s !important; }
-    </style>
-<script id="tailwind-config">
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "surface-variant": "#273647",
-                      "on-background": "#d4e4fa",
-                      "primary-container": "#a078ff",
-                      "on-secondary-container": "#00424e",
-                      "secondary-container": "#03b5d3",
-                      "surface-dim": "#051424",
-                      "primary-fixed-dim": "#d0bcff",
-                      "on-tertiary": "#313030",
-                      "surface-tint": "#d0bcff",
-                      "inverse-surface": "#d4e4fa",
-                      "on-tertiary-fixed": "#1c1b1b",
-                      "surface-container-lowest": "#010f1f",
-                      "on-secondary": "#003640",
-                      "on-secondary-fixed-variant": "#004e5c",
-                      "on-primary-fixed": "#23005c",
-                      "on-error": "#690005",
-                      "inverse-on-surface": "#233143",
-                      "secondary-fixed-dim": "#4cd7f6",
-                      "surface": "#051424",
-                      "on-tertiary-fixed-variant": "#474646",
-                      "tertiary-fixed-dim": "#c9c6c5",
-                      "secondary": "#4cd7f6",
-                      "tertiary-container": "#929090",
-                      "inverse-primary": "#6d3bd7",
-                      "on-primary-container": "#340080",
-                      "tertiary-fixed": "#e5e2e1",
-                      "surface-bright": "#2c3a4c",
-                      "on-error-container": "#ffdad6",
-                      "surface-container-low": "#0d1c2d",
-                      "on-surface-variant": "#cbc3d7",
-                      "tertiary": "#c9c6c5",
-                      "on-primary-fixed-variant": "#5516be",
-                      "surface-container-highest": "#273647",
-                      "on-surface": "#d4e4fa",
-                      "secondary-fixed": "#acedff",
-                      "outline-variant": "#494454",
-                      "error-container": "#93000a",
-                      "primary": "#d0bcff",
-                      "background": "#051424",
-                      "on-primary": "#3c0091",
-                      "primary-fixed": "#e9ddff",
-                      "surface-container-high": "#1c2b3c",
-                      "surface-container": "#122131",
-                      "on-tertiary-container": "#2a2a29",
-                      "outline": "#958ea0",
-                      "on-secondary-fixed": "#001f26",
-                      "error": "#ffb4ab"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.25rem",
-                      "lg": "0.5rem",
-                      "xl": "0.75rem",
-                      "full": "9999px"
-              },
-              "spacing": {
-                      "container-max": "1440px",
-                      "gutter": "32px",
-                      "margin-x": "64px",
-                      "section-gap": "128px",
-                      "unit": "8px"
-              },
-              "fontFamily": {
-                      "headline-md": ["Noto Serif"],
-                      "headline-lg": ["Noto Serif"],
-                      "label-caps": ["Manrope"],
-                      "body-md": ["Manrope"],
-                      "body-lg": ["Manrope"],
-                      "display-xl": ["Noto Serif"]
-              },
-              "fontSize": {
-                      "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "500"}],
-                      "headline-lg": ["48px", {"lineHeight": "1.2", "fontWeight": "600"}],
-                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700"}],
-                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
-                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
-                      "display-xl": ["72px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
-              }
-            },
-          },
-        }
-      </script>
-</head>
-<body class="bg-background text-on-background font-body-md overflow-x-hidden">
-<!-- Mesh Background Decor -->
-<div class="fixed inset-0 z-0 mesh-gradient-bg pointer-events-none opacity-50"></div>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eventra | User Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:          #f5f7f2;
+      --surface:     #ffffff;
+      --surface2:    #eef2eb;
+      --sidebar-bg:  #1e2a1e;
 
-<!-- Side Navigation Shell -->
-<nav class="fixed left-0 top-0 h-full w-72 bg-stone-950/60 backdrop-blur-2xl border-r border-white/10 z-50 flex flex-col pt-24 pb-8 px-6 space-y-4 shadow-2xl shadow-black font-serif text-sm antialiased hidden lg:flex">
-<div class="mb-8 px-2">
-<span class="text-lg font-black text-violet-400">Eventra Hub</span>
-<p class="text-stone-500 text-xs mt-1" id="userNameDisplay">Member</p>
-</div>
-<div class="flex-1 flex flex-col space-y-2">
-<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-stone-500 hover:text-stone-200 hover:bg-white/5 transition-all duration-200" href="#dashboard">
-<span class="material-symbols-outlined text-violet-500">dashboard_customize</span>
-<span>Dashboard</span>
-</a>
-<a class="flex items-center gap-4 px-4 py-3 rounded-lg bg-gradient-to-r from-violet-600/20 to-transparent border-l-2 border-violet-500 text-white transition-all duration-300" href="#curations">
-<span class="material-symbols-outlined text-violet-500">layers</span>
-<span>Curations</span>
-</a>
-<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-stone-500 hover:text-stone-200 hover:bg-white/5 transition-all duration-200" href="#timeline">
-<span class="material-symbols-outlined text-violet-500">auto_graph</span>
-<span>Timeline</span>
-</a>
-</div>
+      --text-primary:   #141a14;
+      --text-secondary: #2d3d2d;
+      --text-body:      #3a4a3a;
+      --text-muted:     #5a6e5a;
+      --text-faint:     #7a8e7a;
 
-<div class="p-4 bg-stone-900 rounded-xl mb-4 border border-white/5 text-center">
-    <p class="font-bold text-stone-500 mb-1">My Tickets</p>
-    <p class="text-3xl font-serif text-violet-400 font-black" id="ticketCount">0</p>
-</div>
+      --teal:        #0d7c6e;
+      --teal-light:  #e0f5f2;
+      --gold:        #a07830;
+      --gold-light:  #fdf3e0;
+      --purple:      #4a3580;
+      --purple-light:#ede8ff;
+      --red:         #b03030;
+      --red-light:   #fdeaea;
+      --green:       #1e6e3a;
+      --green-light: #e4f5ec;
 
-<div class="pt-8 border-t border-white/5 flex flex-col space-y-2">
-<a class="flex items-center gap-4 px-4 py-2 text-stone-500 hover:text-stone-200 transition-colors" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span>Settings</span>
-</a>
-<button id="logoutBtn" class="flex items-center gap-4 px-4 py-2 text-stone-500 hover:text-red-400 transition-colors cursor-pointer w-full text-left">
-<span class="material-symbols-outlined">logout</span>
-<span>Sign Out</span>
-</button>
-</div>
-</nav>
+      --border:      rgba(30,42,30,.14);
+      --border-dark: rgba(30,42,30,.22);
 
-<!-- Top Navigation Shell -->
-<header class="fixed top-0 w-full z-40 bg-stone-950/40 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(139,92,246,0.05)]">
-<div class="flex justify-between items-center h-20 px-8 lg:pl-80 w-full">
-<div class="flex items-center">
-    <img src="logo.jpeg" alt="Eventra Logo" class="h-16 w-auto object-contain mix-blend-screen filter drop-shadow-lg">
-</div>
-<div class="flex items-center space-x-8">
-<div class="relative hidden lg:block">
-<input class="bg-white/5 border border-white/10 rounded-full px-6 py-2 w-64 text-sm focus:outline-none focus:border-cyan-400 transition-all text-white" id="searchLocation" placeholder="Search archives..." type="text"/>
-<span class="material-symbols-outlined absolute right-4 top-2 text-stone-500 text-sm">search</span>
-</div>
-<div class="flex items-center space-x-6 text-stone-400">
-<button class="hover:text-white transition-colors duration-300">
-<span class="material-symbols-outlined">notifications</span>
-</button>
-<button class="hover:text-white transition-colors duration-300">
-<span class="material-symbols-outlined">auto_awesome</span>
-</button>
-<div class="h-10 w-10 rounded-full border border-violet-500/50 p-0.5">
-<img class="w-full h-full rounded-full object-cover" src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"/>
-</div>
-</div>
-</div>
-</div>
-</header>
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(0,0,0,.08);
+      --shadow-sm: 0 2px 10px rgba(0,0,0,.06);
 
-<main class="lg:pl-72 pt-20 relative z-10 w-full overflow-hidden">
-<!-- Hero Section -->
-<section id="dashboard" class="relative h-[819px] w-full overflow-hidden">
-<div class="absolute inset-0">
-<img class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9kRf9SYvQo3eJ8xlWFc1Wf4xe464iT0K9-ix7pi2GDPGRauqAuGDP0OfTJ3qMcP7jOgfcuU5uqxdRuT4E_lxcYam6h8d_2VInP6cl3AtzAfk0Wu9WxfczALv3iNbqWSaHiHb7DeMQOdDrY9hvwCmhw5Vg8b2dhfYExB3JGSgHJMkByjl4hAxba1wX7QGEGTVIuNXMA_rShVfi4FUwSqcbcBfsZ-1oKSOzXkc-LnCx9YznvBkHXpKbkI72MAF4c4WaoCv2kfm6aaSm"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
-<div class="absolute inset-0 bg-gradient-to-r from-background via-transparent to-transparent"></div>
-</div>
-<div class="relative h-full flex flex-col justify-center px-8 lg:px-margin-x max-w-4xl">
-<div class="inline-flex items-center space-x-2 bg-violet-600/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-violet-500/30 mb-8 w-fit">
-<span class="material-symbols-outlined text-xs text-violet-400" style="font-variation-settings: 'FILL' 1;">stars</span>
-<span class="text-label-caps text-[10px] text-violet-200">NEW SEASON PREMIERE</span>
-</div>
-<h1 class="font-display-xl text-5xl lg:text-7xl text-white mb-6">Discover the Art of <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-300">Unseen</span> Experiences</h1>
-<p class="font-body-lg text-lg text-stone-400 mb-10 leading-relaxed max-w-2xl">
-    A curated sanctuary for world-class planners. Access the most prestigious venues and visionary concepts across the globe.
-</p>
-</div>
-</section>
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body:    'DM Sans', sans-serif;
+    }
 
-<!-- Vibe Discovery Section -->
-<section id="vibe-discovery" class="px-8 lg:px-margin-x py-12">
-<div class="glass-ui p-8 rounded-3xl border border-white/5 relative overflow-hidden flex flex-col items-center">
-    <div class="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-cyan-400/10 z-0"></div>
-    <div class="relative z-10 w-full text-center mb-8">
-        <h2 class="font-headline-lg text-4xl text-white mb-2">Vibe Discovery</h2>
-        <p class="text-stone-400 font-body-md">Swipe right to wishlist, swipe left to skip. Find your perfect event.</p>
-    </div>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text-body);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── ANTIGRAVITY CANVAS ── */
+    #ag-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ════════════════════════════
+       SIDEBAR
+    ════════════════════════════ */
+    .sidebar {
+      width: 230px;
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0;
+      position: fixed; left: 0; top: 0; bottom: 0;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      font-weight: 600;
+      color: #fff;
+      padding: 0 24px 28px;
+      letter-spacing: .04em;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sidebar-logo span { color: #6fcfbf; }
+
+    .sidebar-label {
+      font-size: .62rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+      padding: 20px 24px 8px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 24px;
+      font-size: .84rem;
+      font-weight: 400;
+      color: rgba(255,255,255,.6);
+      cursor: pointer;
+      transition: background .18s, color .18s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+    .nav-item.active {
+      background: rgba(111,207,191,.12);
+      color: #6fcfbf;
+      border-left-color: #6fcfbf;
+      font-weight: 500;
+    }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px 24px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      cursor: pointer;
+    }
+    .admin-pill {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .admin-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0d7c6e, #6fcfbf);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 600; color: #fff;
+      flex-shrink: 0;
+    }
+    .admin-name { font-size: .78rem; color: rgba(255,255,255,.75); }
+    .admin-role { font-size: .65rem; color: rgba(255,255,255,.35); }
+
+    /* ════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════ */
+    .main {
+      margin-left: 230px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative; z-index: 1;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: rgba(245,247,242,.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 36px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 9;
+    }
+    .topbar-title {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: .02em;
+    }
+    .topbar-sub {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .topbar-right { display: flex; gap: 12px; align-items: center; }
+
+    /* ── CONTENT AREA ── */
+    .content { padding: 32px 36px; }
+
+    /* ── STAT CARDS ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 26px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      transition: transform .22s, box-shadow .22s;
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .stat-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .stat-card.teal::after  { background: linear-gradient(90deg, #6fcfbf, #0d7c6e); }
     
-    <div class="relative z-10 vibe-deck" id="vibeDeckContainer">
-        <!-- Vibe cards injected here via JS -->
-        <div id="vibeEmptyState" class="absolute inset-0 flex flex-col items-center justify-center text-center hidden">
-            <span class="material-symbols-outlined text-6xl text-violet-400 mb-4">celebration</span>
-            <h3 class="text-xl font-bold text-white mb-2">You're all caught up!</h3>
-            <p class="text-stone-400 text-sm">Check back later for new event vibes.</p>
+    .stat-label {
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2.6rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--text-primary);
+    }
+    .stat-value.teal { color: #0a6358; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 26px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 30px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex; align-items: center; gap: 8px;
+    }
+    
+    /* ── VIBE SWIPER ── */
+    .vibe-deck { position: relative; width: 100%; max-width: 350px; height: 450px; margin: 0 auto; perspective: 1000px; }
+    .vibe-card { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-out; position: absolute; width: 100%; height: 100%; top: 0; left: 0; transform-origin: 50% 100%; border-radius: var(--radius); overflow:hidden; box-shadow: var(--shadow-sm); background: var(--surface); border:1px solid var(--border); }
+    .swipe-left { transform: translateX(-150%) rotate(-25deg) !important; opacity: 0; }
+    .swipe-right { transform: translateX(150%) rotate(25deg) !important; opacity: 0; }
+    .vibe-controls { display:flex; justify-content:center; gap:20px; margin-top: 20px; }
+    .vibe-btn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.5rem; transition: transform 0.2s, background 0.2s; box-shadow: var(--shadow-sm); }
+    .vibe-btn:hover { transform: scale(1.1); background: var(--surface2); }
+    .vibe-btn.skip { color: var(--red); }
+    .vibe-btn.like { color: var(--teal); }
+    
+    /* ── EVENT GRID ── */
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .event-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s;
+    }
+    .event-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .event-img { width: 100%; height: 160px; object-fit: cover; border-bottom: 2px solid var(--teal); }
+    .event-content { padding: 15px; }
+    .event-title { font-weight: 600; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 5px; }
+    .event-detail { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; }
+
+    /* ── FORMS ── */
+    .form-group { margin-bottom: 15px; }
+    .form-input {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-primary); border-radius: 8px; padding: 10px 14px;
+      font-family: var(--font-body); font-size: .85rem;
+    }
+    .form-input:focus { outline: none; border-color: var(--teal); }
+
+    /* ── CHAT WIDGET ── */
+    .chat-widget {
+        position: fixed; bottom: 20px; right: 20px; width: 300px;
+        background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+        overflow: hidden; z-index: 9999; box-shadow: var(--shadow);
+        transition: transform 0.3s;
+    }
+    .chat-widget.collapsed { transform: translateY(calc(100% - 45px)); }
+    .chat-header {
+        background: var(--sidebar-bg); color: #fff; padding: 12px 15px;
+        font-weight: 600; font-size: 0.9rem; cursor: pointer;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .chat-messages {
+        height: 250px; overflow-y: auto; padding: 15px; background: var(--bg);
+        display: flex; flex-direction: column; gap: 8px;
+    }
+    .chat-message {
+        padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; max-width: 85%;
+    }
+    .chat-message.self { background: var(--teal); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .chat-message.other { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 2px; }
+    .chat-input-area {
+        display: flex; padding: 10px; background: var(--surface); border-top: 1px solid var(--border); gap: 8px;
+    }
+    .chat-input { flex: 1; border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 0.85rem; outline: none; }
+    .chat-input:focus { border-color: var(--teal); }
+    .chat-send { background: var(--teal); color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .btn { cursor: pointer; border-radius: 6px; padding: 6px 12px; border: none; font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.8; }
+    .btn-primary { background: var(--teal); color: #fff; }
+    .hidden { display: none !important; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+    .modal-content { background: var(--surface); padding: 30px; border-radius: var(--radius); width: 90%; max-width: 500px; position: relative; max-height: 90vh; overflow-y:auto; }
+    .modal-close { position: absolute; top: 15px; right: 15px; cursor: pointer; background: transparent; border: none; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+
+<!-- Antigravity canvas -->
+<canvas id="ag-canvas"></canvas>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">even<span>tra</span></div>
+
+  <div class="sidebar-label">Main</div>
+  <a class="nav-item active" href="#" data-target="dashboard">
+    <span class="nav-icon material-symbols-outlined">dashboard_customize</span> Dashboard
+  </a>
+  <a class="nav-item" href="#" data-target="curations">
+    <span class="nav-icon material-symbols-outlined">layers</span> Curations
+  </a>
+  <a class="nav-item" href="#" data-target="timeline">
+    <span class="nav-icon material-symbols-outlined">forum</span> Feedback
+  </a>
+
+  <div class="sidebar-label">Quick Switch</div>
+  <a class="nav-item" href="#" onclick="switchRole('host')">
+    <span class="nav-icon material-symbols-outlined">stadium</span> Host View
+  </a>
+  <a class="nav-item" href="#" onclick="switchRole('admin')">
+    <span class="nav-icon material-symbols-outlined">admin_panel_settings</span> Admin View
+  </a>
+
+  <div class="sidebar-footer" id="logoutBtn">
+    <div class="admin-pill">
+      <div class="admin-avatar">U</div>
+      <div>
+        <div class="admin-name" id="userNameDisplay">Member</div>
+        <div class="admin-role">Attendee</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Discover Experiences</div>
+      <div class="topbar-sub">Curated visionary events tailored to your aesthetic.</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- CONTENT SECTIONS -->
+    <div id="dashboard" class="content-section" style="display:block;">
+      <!-- STAT CARDS -->
+      <div class="stat-grid reveal">
+        <div class="stat-card teal">
+          <div class="stat-label">My Tickets</div>
+          <div class="stat-value teal" id="ticketCount">0</div>
+        </div>
+      </div>
+
+    <!-- VIBE DISCOVERY -->
+    <div class="card reveal" id="vibe-discovery" style="text-align:center;">
+        <h2 class="card-title" style="justify-content:center; font-size:1.5rem; margin-bottom:5px;">Vibe Discovery</h2>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Swipe right to wishlist, swipe left to skip. Find your perfect event.</p>
+        
+        <div class="vibe-deck" id="vibeDeckContainer">
+            <!-- Vibe cards injected here via JS -->
+            <div id="vibeEmptyState" class="hidden" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <span class="material-symbols-outlined" style="font-size:3rem; color:var(--teal); margin-bottom:10px;">celebration</span>
+                <h3 style="font-weight:bold; color:var(--text-primary);">You're all caught up!</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem;">Check back later for new event vibes.</p>
+            </div>
+        </div>
+
+        <div class="vibe-controls">
+            <button id="vibeSkipBtn" class="vibe-btn skip">✖</button>
+            <button id="vibeLikeBtn" class="vibe-btn like">❤</button>
         </div>
     </div>
+    </div> <!-- /dashboard section -->
 
-    <div class="relative z-10 flex gap-6 mt-8">
-        <button id="vibeSkipBtn" class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-red-400 hover:bg-red-400/20 hover:border-red-400/50 transition-all shadow-lg backdrop-blur-md">
-            <span class="material-symbols-outlined text-3xl">close</span>
-        </button>
-        <button id="vibeLikeBtn" class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-green-400 hover:bg-green-400/20 hover:border-green-400/50 transition-all shadow-lg backdrop-blur-md">
-            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">favorite</span>
-        </button>
+    <!-- CURATED EVENTS -->
+    <div id="curations" class="content-section" style="display:block; margin-top:30px;">
+    <div class="card reveal">
+        <div class="card-header">
+            <h2 class="card-title" style="font-size:1.5rem;">Curated Events</h2>
+        </div>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Hand-selected visions based on your creative portfolio.</p>
+        
+        <div class="form-group" style="margin-bottom:15px;">
+            <input id="searchLocation" class="form-input" placeholder="Search by location..." type="text"/>
+        </div>
+
+        <div id="userEventsContainer" class="event-grid">
+            <p style="color:var(--text-muted); font-style:italic;">Loading dynamic events...</p>
+        </div>
     </div>
-</div>
-</section>
+    </div> <!-- /curations section -->
 
-<!-- Upcoming Events Section (JS Hooked) -->
-<section id="curations" class="px-8 lg:px-margin-x py-16 bg-stone-950/20">
-<div class="flex justify-between items-end mb-16">
-<div>
-<h2 class="font-headline-lg text-4xl text-white mb-4">Curated Events</h2>
-<p class="text-stone-500 font-body-md">Hand-selected visions based on your creative portfolio.</p>
-</div>
-</div>
-<!-- Container where events will be dynamically added via js/user.js -->
-<div id="userEventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    <p class="text-stone-500">Loading dynamic events...</p>
-</div>
-</section>
-
-<!-- Feedback Section -->
-<section id="timeline" class="px-8 lg:px-margin-x py-16">
-<div class="glass-ui p-8 rounded-2xl border border-white/5">
-    <h2 class="font-headline-lg text-3xl text-white mb-4"><i class="fa-solid fa-bullhorn text-violet-400 mr-2"></i> Platform Feedback</h2>
-    <p class="text-stone-400 mb-6">Have thoughts on Eventra or our wonderful Hosts? Let us know!</p>
-    
-    <div class="flex flex-col gap-4">
-    <textarea id="feedbackText" class="w-full bg-white/5 border border-white/10 rounded-lg p-4 text-white focus:outline-none focus:border-violet-500 transition-colors" rows="3" placeholder="Write your feedback here..."></textarea>
-    <button id="submitFeedbackBtn" class="bg-primary text-on-primary font-bold py-3 px-6 rounded-lg self-start hover:shadow-[0_0_15px_rgba(208,188,255,0.4)] transition-all">Submit Feedback</button>
+    <!-- FEEDBACK -->
+    <div id="timeline" class="content-section" style="display:block; margin-top:30px;">
+    <div class="card reveal">
+        <div class="card-header">
+            <h2 class="card-title" style="font-size:1.5rem;">Platform Feedback</h2>
+        </div>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Have thoughts on Eventra or our wonderful Hosts? Let us know!</p>
+        
+        <div class="form-group">
+            <textarea id="feedbackText" class="form-input" rows="3" placeholder="Write your feedback here..."></textarea>
+        </div>
+        <button id="submitFeedbackBtn" class="btn btn-primary" style="padding:10px 20px; font-weight:bold; margin-bottom: 20px;">Submit Feedback</button>
+        <p id="feedbackAlert" class="hidden" style="color:var(--teal); font-weight:bold; margin-top:10px; font-size:0.85rem;">Feedback submitted successfully!</p>
+        
+        <h3 style="margin-top: 20px; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px;">Recent Community Feedback</h3>
+        <div id="userCommunityFeedback" style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto;">
+            <!-- Feedback list will load here -->
+        </div>
     </div>
-    <p id="feedbackAlert" class="hidden text-cyan-400 font-bold mt-4">Feedback submitted successfully!</p>
-    
-    <h3 class="mt-8 pt-6 border-t border-white/10 font-bold text-lg text-white">Community Feedback</h3>
-    <div id="userCommunityFeedback" class="mt-4 max-h-[300px] overflow-y-auto bg-black/20 p-6 rounded-xl border border-white/5">
-        <p class="text-stone-500">No community feedback yet.</p>
-    </div>
-</div>
-</section>
+    </div> <!-- /timeline section -->
 
+  
+<div style="display:none;">
+    <button id="soundClick"></button>
+    <button id="soundSuccess"></button>
+    <button id="soundSwipe"></button>
+    <div id="vibeDeckContainer"></div>
+    <div id="vibeEmptyState"></div>
+    <button id="vibeSkipBtn"></button>
+    <button id="vibeLikeBtn"></button>
+    <button id="backToBot"></button>
+</div>
+
+</div><!-- /content -->
 </main>
 
-  <!-- Checkout/Payment Modal -->
-  <div id="paymentModal" class="modal-overlay hidden z-[2000]">
-    <div class="modal-content glass-ui">
-      <button class="modal-close" onclick="document.getElementById('paymentModal').classList.add('hidden')">&times;</button>
-      <h2 class="text-2xl font-bold text-white mb-2"><i class="fa-solid fa-lock text-violet-400 mr-2"></i>Secure Checkout</h2>
-      <p class="text-stone-400 text-sm mb-6">Complete payment to generate your ticket.</p>
-      
-      <div class="bg-black/30 p-4 rounded-xl border border-white/5 mb-6 text-white">
-        <p class="flex justify-between mb-2"><span class="text-stone-400">Ticket Price:</span> <span id="checkoutPrice">₹0</span></p>
-        <p class="flex justify-between text-lg font-bold border-t border-white/10 pt-2"><span class="text-stone-300">Total Amount:</span> <span class="text-cyan-400" id="checkoutTotal">₹0</span></p>
-      </div>
+<!-- Chat Widget -->
+<div id="chatWidget" class="chat-widget collapsed">
+    <div class="chat-header" onclick="document.getElementById('chatWidget').classList.toggle('collapsed')">
+        <span>Chat with Admin</span>
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">chat</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <!-- Messages load here -->
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" class="chat-input" placeholder="Type a message...">
+        <button id="chatSend" class="chat-send"><span class="material-symbols-outlined" style="font-size:1rem;">send</span></button>
+    </div>
+</div>
 
-      <div id="paymentMethods" class="flex flex-col gap-4">
-        <div class="text-left mb-2">
-          <label for="ticketQuantity" class="block font-bold mb-2 text-stone-400 text-sm">Number of Tickets (Max 10)</label>
-          <input type="number" id="ticketQuantity" class="w-full bg-white/5 border border-white/10 text-white rounded-lg px-4 py-2" value="1" min="1" max="10">
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 400px; text-align:center;">
+      <button class="modal-close" onclick="document.getElementById('paymentModal').classList.add('hidden')">✖</button>
+      <h2 style="font-size:1.4rem; font-weight:bold; color:var(--text-primary); margin-bottom:10px;">Secure Checkout</h2>
+      <input type="hidden" id="payEventId">
+      <input type="hidden" id="payEventPrice">
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label" style="font-size:0.85rem; color:var(--text-muted);">Quantity</label>
+        <input type="number" id="ticketQuantity" class="form-input" value="1" min="1" max="10">
+      </div>
+      <p style="font-size:1.2rem; font-weight:bold; color:var(--text-primary); margin-bottom:20px;">Total: <span id="checkoutTotal">₹0</span> <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">(<span id="checkoutPrice">₹0</span> each)</span></p>
+      
+      <div id="processingText" class="hidden" style="color:var(--teal); margin-bottom:20px; font-weight:bold;">Processing payment securely...</div>
+      
+      <div style="display:flex; gap:10px; margin-top:20px;">
+          <button id="gpayBtn" class="btn btn-primary wallet-btn" style="flex:1; padding:12px; font-weight:bold;">Pay via GPay</button>
+          <button id="phonepeBtn" class="btn btn-primary wallet-btn" style="flex:1; padding:12px; font-weight:bold;">Pay via PhonePe</button>
+      </div>
+    </div>
+</div>
+
+<div id="ticketModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 400px; text-align:center;">
+      <button class="modal-close" onclick="document.getElementById('ticketModal').classList.add('hidden')">✖</button>
+      <div id="ticketContentToDownload" style="padding: 20px; background: white; border-radius: 8px; text-align: left; border: 1px solid #eee;">
+        <div style="text-align: center; margin-bottom: 15px; border-bottom: 2px dashed #ccc; padding-bottom: 15px;">
+           <h2 id="ticketTitle" style="font-size:1.6rem; font-weight:bold; color:var(--text-primary); margin-bottom:8px;">Event Title</h2>
+           <span style="background: #22c55e; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">PAID & ELIGIBLE</span>
         </div>
-        <input type="hidden" id="payEventId">
-        <input type="hidden" id="payEventPrice">
-        
-        <button id="gpayBtn" class="wallet-btn bg-white text-stone-800 py-3 rounded-lg font-bold flex items-center justify-center hover:bg-stone-200 transition-colors">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="GPay" style="height:20px; margin-right:10px;"> Pay with Google
-        </button>
-        <button id="phonepeBtn" class="wallet-btn bg-[#5f259f] text-white py-3 rounded-lg font-bold flex items-center justify-center hover:opacity-90 transition-opacity">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style="height:20px; filter:brightness(0) invert(1); margin-right:10px;"> PhonePe
-        </button>
+        <div style="margin-bottom: 20px; color: var(--text-primary);">
+           <p style="margin: 5px 0; font-size: 0.95rem;"><strong>Attendee:</strong> <span id="ticketAttendee"></span></p>
+           <p style="margin: 5px 0; font-size: 0.95rem;"><strong>Location:</strong> <span id="ticketLocation"></span></p>
+           <p style="margin: 5px 0; font-size: 0.95rem;"><strong>Date:</strong> <span id="ticketDateTime"></span></p>
+           <p style="margin: 5px 0; font-size: 0.95rem;"><strong>Ticket Price:</strong> <span id="ticketPriceDisplay"></span></p>
+        </div>
+        <div style="text-align: center;">
+           <img id="qrImage" src="" style="width:180px; height:180px; margin:0 auto; display:block; border-radius:8px;">
+           <p style="color:var(--text-muted); font-size:0.8rem; margin-top:10px;">Show this QR code at the entrance.</p>
+        </div>
       </div>
-      <p id="processingText" class="hidden text-violet-400 text-center mt-4 font-bold">Processing Payment Securely...</p>
+      <button id="downloadPdfBtn" class="btn btn-primary" style="margin-top: 20px; width: 100%; padding: 12px; font-weight: bold;"><i class="fa-solid fa-file-pdf"></i> Download PDF Ticket</button>
     </div>
-  </div>
+</div>
 
-  <!-- Ticket/QR Modal -->
-  <div id="ticketModal" class="modal-overlay hidden z-[2000]">
-    <div class="modal-content glass-ui text-center">
-      <button class="modal-close" onclick="document.getElementById('ticketModal').classList.add('hidden')">&times;</button>
-      <h2 class="text-2xl font-bold text-cyan-400 mb-2">Payment Successful!</h2>
-      <p class="text-stone-400 text-sm mb-6">Here is your official QR Ticket Link.</p>
-      
-      <div id="qrTicketContainer" class="inline-block p-6 bg-white rounded-xl shadow-lg border border-stone-100">
-        <img id="qrImage" src="" alt="QR Code Link" class="w-[200px] h-[200px] rounded-lg">
-        <h3 id="ticketTitle" class="mt-4 font-bold text-stone-800">Event Title</h3>
+<div id="matchmakingModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 400px;">
+      <button class="modal-close" onclick="document.getElementById('matchmakingModal').classList.add('hidden')">✖</button>
+      <h2 style="font-size:1.4rem; font-weight:bold; color:var(--text-primary); margin-bottom:10px;">Attendee Network</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid var(--border);">
+        <span style="font-size:0.85rem; color:var(--text-muted);">Be visible to others?</span>
+        <input type="checkbox" id="optInMatchmaking" style="width:20px; height:20px;">
       </div>
-      <div class="mt-8 flex justify-center gap-4">
-        <button class="bg-primary text-on-primary font-bold py-2 px-6 rounded-lg hover:shadow-[0_0_15px_rgba(208,188,255,0.4)] transition-all" onclick="window.location.href='ticket.html?eventId=' + document.getElementById('payEventId').value">View Page</button>
-        <button class="bg-white/10 border border-white/20 text-white font-bold py-2 px-6 rounded-lg hover:bg-white/20 transition-all" onclick="document.getElementById('ticketModal').classList.add('hidden')">Close</button>
-      </div>
+      <div id="matchmakingList" style="display:flex; flex-direction:column; gap:10px; max-height:250px; overflow-y:auto;"></div>
     </div>
-  </div>
+</div>
 
-  <!-- Matchmaking Modal -->
-  <div id="matchmakingModal" class="modal-overlay hidden z-[2000]">
-    <div class="modal-content glass-ui text-center">
-      <button class="modal-close" onclick="document.getElementById('matchmakingModal').classList.add('hidden')">&times;</button>
-      <h2 class="text-2xl font-bold text-violet-400 mb-2">Attendee Matchmaking</h2>
-      <p class="text-stone-400 text-sm mb-6">Connect with others attending this event!</p>
-      
-      <div id="matchmakingList" class="flex flex-col gap-4 max-h-[300px] overflow-y-auto p-2 text-left">
-        <!-- populated via js -->
-      </div>
-      
-      <div class="mt-6 pt-4 border-t border-white/10">
-        <label class="flex items-center justify-center gap-2 cursor-pointer">
-          <input type="checkbox" id="optInMatchmaking" class="rounded bg-white/5 border-white/20 text-violet-500 focus:ring-0">
-          <span class="text-sm text-stone-300">Make my profile visible to other attendees</span>
-        </label>
-      </div>
-    </div>
-  </div>
+<script>
+/* ═══════════════════════════════════════
+   ANTIGRAVITY PARTICLES (lighter, subtle)
+═══════════════════════════════════════ */
+const canvas = document.getElementById('ag-canvas');
+const ctx = canvas.getContext('2d');
 
-  <!-- Chat Widget (Leverages old style.css structure mostly for toggles if needed) -->
-  <div id="chatWidget" class="chat-widget collapsed glass-ui" style="position:fixed; bottom:20px; right:20px; width:300px; border:1px solid rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; z-index:9999;">
-      <div class="chat-header p-3 bg-violet-900/50 cursor-pointer flex justify-between font-bold text-white border-b border-white/10" onclick="document.getElementById('chatWidget').classList.toggle('collapsed')">
-          <span>Eventra Chatbooth</span>
-          <span>🤖</span>
-      </div>
-      <div class="chat-messages bg-black/50 h-[250px] overflow-y-auto p-3" id="chatMessages">
-          <!-- Messages load here -->
-      </div>
-      <div class="chat-input-area border-t border-white/10 bg-black/80 flex p-2 gap-2" style="display:flex;">
-          <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 bg-white/10 border-none text-white rounded px-2 focus:outine-none">
-          <button id="chatSend" class="bg-violet-600 text-white px-3 py-1 rounded">➤</button>
-      </div>
-  </div>
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
 
-  <!-- Hidden Audio Elements for Micro-interactions -->
-  <audio id="soundClick" src="https://assets.mixkit.co/active_storage/sfx/1120/1120-preview.mp3" preload="auto"></audio>
-  <audio id="soundSuccess" src="https://assets.mixkit.co/active_storage/sfx/2574/2574-preview.mp3" preload="auto"></audio>
-  <audio id="soundSwipe" src="https://assets.mixkit.co/active_storage/sfx/166/166-preview.mp3" preload="auto"></audio>
+const PALETTE = [
+  'rgba(13,124,110,',
+  'rgba(111,207,191,',
+  'rgba(160,120,48,',
+  'rgba(74,53,128,',
+  'rgba(30,110,58,',
+];
 
+class Dot {
+  constructor(initial) {
+    this.x  = Math.random() * canvas.width;
+    this.y  = initial ? Math.random() * canvas.height : canvas.height + 10;
+    this.r  = 1.2 + Math.random() * 3;
+    this.vx = (Math.random() - .5) * .35;
+    this.vy = -(0.2 + Math.random() * 0.45);
+    this.alpha = 0.07 + Math.random() * 0.16;
+    this.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+    this.wb = Math.random() * Math.PI * 2;
+    this.wbS = 0.008 + Math.random() * 0.018;
+  }
+  update(mx, my) {
+    this.vy -= 0.0008;
+    this.wb += this.wbS;
+    this.x += this.vx + Math.sin(this.wb) * 0.28;
+    this.y += this.vy;
+
+    const dx = this.x - mx, dy = this.y - my;
+    const d = Math.sqrt(dx*dx + dy*dy);
+    if (d < 80) {
+      const f = (80 - d) / 80;
+      this.vx += (dx/d) * f * 1.4;
+      this.vy += (dy/d) * f * 1.4;
+    }
+    this.vx *= 0.988;
+    this.vy = Math.max(this.vy * 0.99, -0.7);
+
+    if (this.y < -12 || this.x < -30 || this.x > canvas.width + 30) {
+      Object.assign(this, new Dot(false));
+    }
+  }
+  draw() {
+    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 2.5);
+    g.addColorStop(0,   this.color + this.alpha + ')');
+    g.addColorStop(0.6, this.color + (this.alpha * .4) + ')');
+    g.addColorStop(1,   this.color + '0)');
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r * 2.5, 0, Math.PI*2);
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r * .45, 0, Math.PI*2);
+    ctx.fillStyle = this.color + Math.min(this.alpha * 2, .4) + ')';
+    ctx.fill();
+  }
+}
+
+const dots = Array.from({ length: 70 }, (_, i) => new Dot(true));
+let mx = canvas.width/2, my = canvas.height/2;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+(function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  dots.forEach(d => { d.update(mx, my); d.draw(); });
+  requestAnimationFrame(loop);
+})();
+
+/* ═══════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════ */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  el.style.transitionDelay = i * 0.1 + 's';
+  io.observe(el);
+});
+</script>
+
+<script>
+  // Sidebar Smooth Scroll Logic
+  document.querySelectorAll('.nav-item[data-target]').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item[data-target]').forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+      const targetId = item.getAttribute('data-target');
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="js/common.js?v=6"></script>
+<script src="js/user.js?v=6"></script>
 </body>
-<!-- The user JS uses common.js and user.js -->
-<script src="js/common.js"></script>
-<script src="js/user.js?v=3"></script>
 </html>

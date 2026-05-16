@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load and render events (with search filter)
   const loadUserEvents = (filterLocation = "") => {
     let events = JSON.parse(localStorage.getItem('events')) || [];
-    let approvedEvents = events.filter(e => e.status === 'published'); // Live events only
+    
+    let approvedEvents = events.filter(e => e.status === 'published');
 
     if (filterLocation) {
       approvedEvents = approvedEvents.filter(e => e.location && e.location.toLowerCase().includes(filterLocation.toLowerCase()));
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isSoldOut = evtTicketsCount >= capacity;
       
       let imgHtml = '';
-      if (evt.images && evt.images.length > 0) {
+      if (Array.isArray(evt.images) && evt.images.length > 0) {
         imgHtml = `<div style="display:flex; overflow-x: auto; gap: 10px; margin-bottom: 1rem; padding-bottom: 5px;">`;
         evt.images.forEach(img => {
           imgHtml += `<img src="${img}" style="width:200px; height:150px; object-fit:cover; border-radius:12px; flex-shrink: 0;">`;
@@ -98,18 +99,16 @@ document.addEventListener('DOMContentLoaded', () => {
       let reviewSectionHtml = `<div style="margin-top: 1.5rem; border-top: 1px solid rgba(233, 213, 255, 0.4); padding-top: 1rem;">`;
       reviewSectionHtml += `<h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-star" style="color: gold;"></i> Reviews (${avgRating} avg, ${thisEventReviews.length} total)</h4>`;
       
-      // If user has a ticket, show add review box
-      if (alreadyHaveTicket) {
-        reviewSectionHtml += `
-          <div style="display:flex; gap: 10px; margin-bottom: 1rem; align-items:center;">
-             <select class="form-control review-rating-${evt.id}" style="width: 70px;">
-                <option value="5">5 ⭐</option><option value="4">4 ⭐</option><option value="3">3 ⭐</option><option value="2">2 ⭐</option><option value="1">1 ⭐</option>
-             </select>
-             <input type="text" class="form-control review-text-${evt.id}" placeholder="Write a review..." style="flex-grow:1;">
-             <button class="btn btn-primary submit-review-btn" data-id="${evt.id}" style="padding: 0.5rem 1rem;">Post</button>
-          </div>
-        `;
-      }
+      // Show add review box for all users
+      reviewSectionHtml += `
+        <div style="display:flex; gap: 10px; margin-bottom: 1rem; align-items:center;">
+           <select class="form-control review-rating-${evt.id}" style="width: 70px;">
+              <option value="5">5 ⭐</option><option value="4">4 ⭐</option><option value="3">3 ⭐</option><option value="2">2 ⭐</option><option value="1">1 ⭐</option>
+           </select>
+           <input type="text" class="form-control review-text-${evt.id}" placeholder="Write a review..." style="flex-grow:1;">
+           <button class="btn btn-primary submit-review-btn" data-id="${evt.id}" style="padding: 0.5rem 1rem;">Post</button>
+        </div>
+      `;
       
       // List existing reviews
       if (thisEventReviews.length > 0) {
@@ -295,65 +294,95 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.wallet-btn').forEach(b => b.style.display = 'none');
     document.getElementById('processingText').classList.remove('hidden');
 
-    setTimeout(() => {
-      const eventId = document.getElementById('payEventId').value;
-      
-      let quantity = 1;
-      const qtyInput = document.getElementById('ticketQuantity');
-      if (qtyInput) {
-        quantity = parseInt(qtyInput.value, 10);
-        if (isNaN(quantity) || quantity < 1) quantity = 1;
-        if (quantity > 10) quantity = 10;
+    const eventId = document.getElementById('payEventId').value;
+    
+    let quantity = 1;
+    const qtyInput = document.getElementById('ticketQuantity');
+    if (qtyInput) {
+      quantity = parseInt(qtyInput.value, 10);
+      if (isNaN(quantity) || quantity < 1) quantity = 1;
+      if (quantity > 10) quantity = 10;
+    }
+    
+    // Get Event Info for QR
+    const events = JSON.parse(localStorage.getItem('events')) || [];
+    const evt = events.find(el => el.id === eventId);
+    
+    // Trigger Email Notification & Schedule Reminder
+    fetch('/api/book-ticket', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userEmail: loggedInUser.email,
+        userName: loggedInUser.name,
+        eventTitle: evt.title,
+        eventDate: evt.date,
+        eventId: eventId,
+        eventLocation: evt.location || 'Online'
+      })
+    })
+    .then(async res => {
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}: ${text}`);
       }
-      
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error("Invalid JSON from server: " + text.substring(0, 50));
+      }
+    })
+    .then(data => {
       // Fake payment success. Save to ticket storage.
-      const tickets = JSON.parse(localStorage.getItem('userTickets')) || [];
-      for (let i = 0; i < quantity; i++) {
-        tickets.push({ userEmail: loggedInUser.email, eventId: eventId });
+      try {
+        const tickets = JSON.parse(localStorage.getItem('userTickets')) || [];
+        for (let i = 0; i < quantity; i++) {
+          tickets.push({ userEmail: loggedInUser.email, eventId: eventId, ticketId: data.ticketId });
+        }
+        localStorage.setItem('userTickets', JSON.stringify(tickets));
+      } catch (e) {
+        console.warn("Could not save ticket to localStorage, possibly QuotaExceededError.", e);
       }
-      localStorage.setItem('userTickets', JSON.stringify(tickets));
 
-      // Get Event Info for QR
-      const events = JSON.parse(localStorage.getItem('events')) || [];
-      const evt = events.find(el => el.id === eventId);
-      
-      // Trigger Email Notification & Schedule Reminder
-      fetch('/api/book-ticket', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userEmail: loggedInUser.email,
-          userName: loggedInUser.name,
-          eventTitle: evt.title,
-          eventDate: evt.date
-        })
-      }).catch(err => console.error('Failed to notify server of booking:', err));
-      
-      // Generate robust, accessible URL replacing user_dashboard.html with ticket.html
-      let currentPath = window.location.href.split('?')[0].replace('user_dashboard.html', 'ticket.html');
-      
-      const ticketUrlObj = new URL(currentPath);
-      ticketUrlObj.searchParams.set('eventId', eventId || '');
-      ticketUrlObj.searchParams.set('name', loggedInUser.name || '');
-      ticketUrlObj.searchParams.set('title', evt.title || '');
-      ticketUrlObj.searchParams.set('date', evt.date || '');
-      ticketUrlObj.searchParams.set('time', evt.time || '');
-      ticketUrlObj.searchParams.set('location', evt.location || '');
-      ticketUrlObj.searchParams.set('price', evt.price || '');
-      
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&margin=10&data=${encodeURIComponent(ticketUrlObj.href)}`;
-
-      document.getElementById('qrImage').src = qrUrl;
-      document.getElementById('ticketTitle').textContent = evt.title;
-
-      paymentModal.classList.add('hidden');
-      ticketModal.classList.remove('hidden');
-      loadUserEvents(searchInput.value);
-    }, 2000); // 2 second mock delay
+      // Navigate to the newly generated ticket page
+      if (data.ticketId) {
+        window.location.href = `/ticket/${data.ticketId}`;
+      } else {
+        alert("Ticket booked successfully! (No ticket ID from server)");
+        paymentModal.classList.add('hidden');
+        loadUserEvents(document.getElementById('searchLocation').value);
+      }
+    })
+    .catch(err => {
+      console.error('Failed to notify server of booking:', err);
+      alert('There was an error processing your ticket:\n' + err.message);
+      document.querySelectorAll('.wallet-btn').forEach(b => b.style.display = 'block');
+      document.getElementById('processingText').classList.add('hidden');
+    });
   };
 
   document.getElementById('gpayBtn').addEventListener('click', processPayment);
   document.getElementById('phonepeBtn').addEventListener('click', processPayment);
+
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', () => {
+      const element = document.getElementById('ticketContentToDownload');
+      const opt = {
+        margin:       10,
+        filename:     'Eventra_Ticket.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, allowTaint: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      // Use html2pdf if it's loaded
+      if (typeof html2pdf !== 'undefined') {
+          html2pdf().set(opt).from(element).save();
+      } else {
+          alert('PDF generation library not loaded yet. Please try again.');
+      }
+    });
+  }
 
 
   // --------------- FEEDBACK LOGIC ---------------
@@ -477,36 +506,27 @@ document.addEventListener('DOMContentLoaded', () => {
     chatInput.value = '';
     loadChat();
 
-    // Chatbot auto-reply logic (only if talking to bot)
+    // Chatbot auto-reply logic using API
     if (currentChatTarget === 'bot') {
-      setTimeout(() => {
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      })
+      .then(res => res.json())
+      .then(data => {
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
-        
-        let replyText = "I'm the Eventra Chatbooth! I'm still learning, but I can help you with tickets, refunds, payments, or hosting events. What would you like to know?";
-        const lowerText = text.toLowerCase();
-        
-        if (lowerText.match(/\b(hello|hi|hey|greetings|help|start|menu)\b/i)) {
-          replyText = "Hello there! Welcome to Eventra. Are you looking for events, or do you have questions about tickets, payments, or hosting?";
-        } else if (lowerText.match(/\b(ticket|tickets|booking|book|curations|events|event|attend)\b/i)) {
-          replyText = "You can view your booked tickets right here on your dashboard under 'My Tickets'. To find new events, check out the 'Curations' section!";
-        } else if (lowerText.match(/\b(refund|refunds|cancel|cancellation|return)\b/i)) {
-          replyText = "For cancellations and refunds, please contact the event host directly through the event details or reach out to our support team at support@eventra.io.";
-        } else if (lowerText.match(/\b(payment|pay|transaction|money|cost|price|gpay|phonepe)\b/i)) {
-          replyText = "We support Google Pay and PhonePe for seamless transactions. All payments are encrypted and secure!";
-        } else if (lowerText.match(/\b(host|create|organize|propose|new)\b/i)) {
-          replyText = "Want to host an event? You can sign out and register as a 'Host' persona to start creating and proposing your own experiences.";
-        }
-        
         messages.push({
           hostId: loggedInUser.email,
           sender: 'bot',
           receiver: loggedInUser.email,
-          text: replyText,
+          text: data.reply || "Sorry, I couldn't process that.",
           timestamp: new Date().getTime()
         });
         localStorage.setItem('messages', JSON.stringify(messages));
         loadChat();
-      }, 1000);
+      })
+      .catch(err => console.error('Chat error:', err));
     }
   });
 
@@ -610,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (reverseIndex > 3) card.style.opacity = '0'; // hide cards deep in stack
 
       let imgUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png';
-      if (evt.images && evt.images.length > 0) imgUrl = evt.images[0];
+      if (Array.isArray(evt.images) && evt.images.length > 0) imgUrl = evt.images[0];
       else if (evt.image) imgUrl = evt.image;
 
       card.innerHTML = `
@@ -632,8 +652,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const events = JSON.parse(localStorage.getItem('events')) || [];
     const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
     
-    // Filter events not in wishlist and only published ones
-    vibeEvents = events.filter(e => e.status === 'published' && !wishlist.includes(e.id));
+    // Filter events not in wishlist and published
+    vibeEvents = events.filter(e => {
+      if (e.status !== 'published' || wishlist.includes(e.id)) return false;
+      return true;
+    });
     renderVibeDeck();
   };
 
@@ -668,8 +691,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (vibeSkipBtn) vibeSkipBtn.addEventListener('click', () => handleSwipe('left'));
   if (vibeLikeBtn) vibeLikeBtn.addEventListener('click', () => handleSwipe('right'));
 
-  loadVibeDiscovery();
+  try {
+    loadVibeDiscovery();
+    loadUserEvents();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('userEventsContainer').innerHTML = `<p style="color:red;">Failed to load events: ${err.message}</p>`;
+  }
 
-  loadUserEvents();
-  loadChat();
+  try {
+    loadChat();
+  } catch (err) {
+    console.error(err);
+  }
 });

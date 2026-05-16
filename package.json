@@ -8,11 +8,15 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^11.5.0",
+    "better-sqlite3": "^12.10.0",
+    "dotenv": "^17.4.2",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "node-cron": "^4.2.1",
-    "nodemailer": "^8.0.5"
+    "nodemailer": "^8.0.5",
+    "pdfkit": "^0.18.0",
+    "qrcode": "^1.5.4"
   }
 }

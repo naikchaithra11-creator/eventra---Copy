@@ -31,7 +31,7 @@ async function initTransporter() {
 /**
  * Sends a booking confirmation email.
  */
-async function sendBookingConfirmation(email, name, eventTitle, eventDate) {
+async function sendBookingConfirmation(email, name, eventTitle, eventDate, qrImagePath) {
   const transp = await initTransporter();
   
   const mailOptions = {
@@ -48,11 +48,30 @@ async function sendBookingConfirmation(email, name, eventTitle, eventDate) {
            </div>`
   };
 
+  if (qrImagePath) {
+    mailOptions.attachments = [
+      {
+        filename: 'ticket-qr.png',
+        path: qrImagePath,
+        cid: 'ticket_qr'
+      }
+    ];
+    mailOptions.html = `<div style="font-family: sans-serif; padding: 20px;">
+            <h2>Hello ${name || 'User'},</h2>
+            <p>Your ticket for <strong>${eventTitle}</strong> on <strong>${eventDate}</strong> has been successfully booked!</p>
+            <p>We are excited to see you there. Please find your ticket QR code attached below:</p>
+            <br/>
+            <img src="cid:ticket_qr" alt="QR Code" style="width:200px; height:200px;" />
+            <hr />
+            <p><em>Thank you for choosing Eventra!</em></p>
+           </div>`;
+  }
+
   try {
     let info = await transp.sendMail(mailOptions);
     console.log('✉️ Booking Email sent: %s', info.messageId);
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-    return true;
+    return nodemailer.getTestMessageUrl(info);
   } catch (error) {
     console.error('Failed to send booking email:', error);
     return false;
@@ -90,7 +109,42 @@ async function sendEventReminder(email, name, eventTitle, eventDate) {
   }
 }
 
+/**
+ * Sends a scan/check-in notification email.
+ */
+async function sendScanNotification(email, name, eventTitle, eventDate, eventLocation) {
+  const transp = await initTransporter();
+  
+  const mailOptions = {
+    from: '"Eventra Security" <no-reply@eventra.com>',
+    to: email,
+    subject: `Ticket Verified: ${eventTitle}`,
+    text: `Hello ${name || 'User'},\n\nYour ticket for '${eventTitle}' has just been successfully verified at the entrance.\n\nEnjoy the event!`,
+    html: `<div style="font-family: sans-serif; padding: 20px;">
+            <h2>Hello ${name || 'User'},</h2>
+            <p>Your ticket for <strong>${eventTitle}</strong> has just been successfully verified at the entrance.</p>
+            <p><strong>Location:</strong> ${eventLocation || 'Online'}</p>
+            <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+            <br/>
+            <p>We hope you have a fantastic time!</p>
+            <hr />
+            <p><em>Thank you for choosing Eventra!</em></p>
+           </div>`
+  };
+
+  try {
+    let info = await transp.sendMail(mailOptions);
+    console.log('✉️ Scan Notification Email sent: %s', info.messageId);
+    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    return nodemailer.getTestMessageUrl(info);
+  } catch (error) {
+    console.error('Failed to send scan notification email:', error);
+    return false;
+  }
+}
+
 module.exports = {
   sendBookingConfirmation,
-  sendEventReminder
+  sendEventReminder,
+  sendScanNotification
 };
