@@ -787,9 +787,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+<!-- QR Scanner Modal -->
+<div id="scannerModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeScanner()">✖</button>
+    <h3>Scan Ticket</h3>
 
+    <div id="reader" style="width:100%; margin-top:15px;"></div>
+    <p id="scanResult" style="margin-top:10px; font-size:14px;"></p>
+  </div>
+</div>
 </script>
+<script>
+let scanner;
 
+function openScannerModal() {
+  document.getElementById("scannerModal").classList.remove("hidden");
+
+  scanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: 250
+  });
+
+  scanner.render(onScanSuccess);
+}
+
+function closeScanner() {
+  document.getElementById("scannerModal").classList.add("hidden");
+
+  if (scanner) {
+    scanner.clear();
+  }
+}
+
+function onScanSuccess(decodedText) {
+  document.getElementById("scanResult").innerText = "Scanned: " + decodedText;
+
+  // Send to backend
+  fetch('/checkin', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ qrData: decodedText })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Error checking QR");
+  });
+}
+</script>
 <script src="js/common.js"></script>
 <script src="js/admin.js?v=4"></script>
 </body>
